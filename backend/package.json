@@ -1,0 +1,35 @@
+{
+  "name": "bootcampengine",
+  "version": "1.0.0",
+  "description": "Deploy serverless",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/serverless offline start --config lambda_functions/serverless.yml --stage test --region eu-west-1 --apiKey 123456789",
+    "debug": "export SLS_DEBUG=* && node --inspect ./node_modules/.bin/serverless offline start --config lambda_functions/serverless.yml --stage test --region eu-west-1 --apiKey 123456789",
+    "test:integration-backend": "./node_modules/.bin/newman run integration_testing/CavendishEndToEnd.postman_collection.json -e integration_testing/postman_environment.json -r cli,junit --reporter-junit-export integration_testing/junit-report.xml"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@datadog/datadog-ci": "^1.12.0",
+    "newman": "^5.3.2",
+    "serverless": "^3.32.2",
+    "serverless-apigw-binary": "^0.4.4",
+    "serverless-certificate-creator": "^1.6.0",
+    "serverless-cloudformation-changesets": "file:serverless_plugins/cf-changesets",
+    "serverless-cloudformation-sub-variables": "^0.2.1",
+    "serverless-dependson-plugin": "^1.1.2",
+    "serverless-domain-manager": "^5.8.0",
+    "serverless-iam-roles-per-function": "^3.2.0",
+    "serverless-plugin-datadog": "^5.34.0",
+    "serverless-plugin-ifelse": "^1.0.7",
+    "serverless-prune-plugin": "^2.0.2",
+    "serverless-python-requirements": "6.0.0",
+    "serverless-s3-remover": "^0.6.0",
+    "serverless-ssm-publish": "^1.4.2"
+  }
+}

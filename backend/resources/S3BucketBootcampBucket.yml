@@ -1,0 +1,19 @@
+S3BucketBootcampBucket:
+  Type: AWS::S3::Bucket
+  Properties:
+    BucketName: ${self:service}-${self:provider.stage}
+    CorsConfiguration:
+      CorsRules:
+      - AllowedHeaders:
+          - "*"
+        AllowedMethods:
+          - GET
+        AllowedOrigins:
+          - "https://${self:provider.stage}.cavendish.digital"
+    BucketEncryption:
+      ServerSideEncryptionConfiguration:
+      - ServerSideEncryptionByDefault:
+          SSEAlgorithm: "aws:kms"
+          KMSMasterKeyID:
+            Fn::GetAtt: [CMKS3, Arn]
+        BucketKeyEnabled: true

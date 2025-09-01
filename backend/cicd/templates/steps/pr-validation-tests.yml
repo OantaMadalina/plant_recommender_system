@@ -1,0 +1,42 @@
+steps:
+- script: |
+    python3.10 -m ensurepip --upgrade
+    python3.10 -m pip install flake8
+  workingDirectory: '$(System.DefaultWorkingDirectory)/backend'
+  displayName: 'Install PY pip tools and flake8'
+
+- script: |
+    python3.10 -m pip install --upgrade pip setuptools wheel
+    pip install -r backend/requirements-dev.txt
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  displayName: 'Install PY testing deps'
+
+# the scripts/create_order_errors_csv.py file is excluded as getting linting error due to sys.path line 5 but this is needed for line 7
+- script: |
+    flake8 . --ignore=W503 --per-file-ignores='test/*.py:E501' --max-line-length 100
+  workingDirectory: '$(System.DefaultWorkingDirectory)/backend'
+  displayName: 'Run flake8'
+
+- script: |
+    echo $PWD && ls -al && printf "%s\n%s\neu-west-1\njson" "NOKEY" "NOKEY" | aws configure
+    source bin/activate
+    export TEST_FILES_DIR=$(System.DefaultWorkingDirectory)/backend/test/files
+    pytest -v --junitxml unittests.xml --cov-report xml:tests_coverage/tests_coverage.xml --cov-report term --cov=services --cov=cavendish_lib  test/
+  workingDirectory: '$(System.DefaultWorkingDirectory)/backend'
+  displayName: 'Run unit tests'
+
+- task: PublishTestResults@2
+  displayName: Publish tests
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/*.xml'
+    searchFolder: '$(System.DefaultWorkingDirectory)/backend'
+    failTaskOnFailedTests: true
+    testRunTitle: 'Backend unit testing'
+
+- task: PublishCodeCoverageResults@1
+  displayName: Publish coverage
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/backend/tests_coverage/tests_coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/backend/tests_coverage'

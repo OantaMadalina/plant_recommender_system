@@ -1,0 +1,58 @@
+trigger: none
+
+variables:
+  - group: awsaccess
+  - name: awsRegion
+    value: 'eu-west-1'
+
+  - name: stageName
+    ${{ if eq(variables['Build.SourceBranchName'], 'prod') }}:
+      value: 'prod'
+    ${{ if ne(variables['Build.SourceBranchName'], 'prod') }}:
+      value: '$(Build.SourceBranchName)'
+  - name: stackName
+    value: bootcampengine-$(stageName)
+  - name: accessKey
+    ${{ if eq(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awskeyprod)
+    ${{ if ne(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awskey)
+  - name: secretKey
+    ${{ if eq(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awssecretkeyprod)
+    ${{ if ne(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awssecretkey)
+
+stages:
+- stage: 'Update_Environment_data'
+  jobs:
+  - job: 'Update_Environ'
+    displayName: 'Update application config'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.8'
+        addToPath: true
+        architecture: 'x64'
+    - script: python -m pip install --upgrade pip setuptools wheel
+      displayName: 'Install pip tools'
+    - script: |
+        pip install boto3
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
+      displayName: 'Setup boto3'
+    - script: |
+        printf "%s\n%s\neu-west-1\njson" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | aws configure > .awsconf
+        if aws cloudformation describe-stacks --stack-name $(stackName) &>/dev/null; then EXISTS="Y"; fi
+        if [[ "$(aws cloudformation describe-stacks --stack-name $(stackName) --query "Stacks[0].StackStatus" --output text 2>/dev/null)" == "UPDATE_COMPLETE" ]]; then CLEAN="Y"; fi
+        if [[ "$CLEAN" != "Y" ]]; then echo "Stack is not clean, exiting" && exit 1; fi
+        echo "Exists - $EXISTS"
+        echo "Clean - $CLEAN"
+        aws s3 cp ./scripts/dataset_files/SLID_LIST.csv "s3://bootcampengine-$(stageName)/Cavendish/SLIDUpdates/"
+        python ./scripts/initialize_tables.py "bootcampengine_$(stageName)_"
+        echo "Environment data updated"
+      env:
+        AWS_ACCESS_KEY_ID: $(secretKey)
+        AWS_SECRET_ACCESS_KEY: $(accessKey)
+      workingDirectory: '$(System.DefaultWorkingDirectory)/backend/'
+      failOnStderr: true
+      displayName: Update application config

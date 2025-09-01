@@ -1,0 +1,73 @@
+CMKS3:
+  Type: AWS::KMS::Key
+  Properties:
+    Description: CMK used for the Cavendish-${self:provider.stage} S3 encryption
+    MultiRegion: false
+    EnableKeyRotation: true
+    PendingWindowInDays: 7
+    KeyPolicy:
+      Version: '2012-10-17'
+      Id: cmk-s3-${self:provider.stage}
+      Statement:
+      - Sid: Enable IAM User Permissions  # TODO: to be removed
+        Effect: Allow
+        Principal:
+          AWS: !Sub 'arn:aws:iam::${param:mftAccount}:root'
+        Action: kms:*
+        Resource: '*'
+      - Sid: Enable IAM User Permissions for MFT account  # TODO: to be removed
+        Effect: Allow
+        Principal:
+          AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+        Action: kms:*
+        Resource: '*'
+
+      - Sid: Allow access for Key Administrators
+        Effect: Allow
+        Principal:
+          AWS:
+          # - !Sub 'arn:aws:iam::${AWS::AccountId}:role/KMSAdmin'
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:user/${self:custom.vars.aws-devops-user.${self:custom.stage}, self:custom.vars.aws-devops-user.other}'
+        Action:
+        - kms:Create*
+        - kms:Describe*
+        - kms:Enable*
+        - kms:List*
+        - kms:Put*
+        - kms:Update*
+        - kms:Revoke*
+        - kms:Disable*
+        - kms:Get*
+        - kms:Delete*
+        - kms:TagResource
+        - kms:UntagResource
+        - kms:ScheduleKeyDeletion
+        - kms:CancelKeyDeletion
+        Resource: '*'
+
+      - Sid: Enable S3 use of the key
+        Effect: Allow
+        Principal:
+          AWS: "*"
+        Action:
+        - kms:Encrypt
+        - kms:Decrypt
+        - kms:GenerateDataKey
+        Resource: "*"
+        Condition:
+          StringEquals:
+            kms:CallerAccount: !Ref AWS::AccountId
+            kms:ViaService: !Sub 's3.${AWS::Region}.amazonaws.com'
+      - Sid: Enable S3 use of the key for MFT account
+        Effect: Allow
+        Principal:
+          AWS: "*"
+        Action:
+        - kms:Encrypt
+        - kms:Decrypt
+        - kms:GenerateDataKey
+        Resource: "*"
+        Condition:
+          StringEquals:
+            kms:CallerAccount: ${param:mftAccount}
+            kms:ViaService: !Sub 's3.${AWS::Region}.amazonaws.com'

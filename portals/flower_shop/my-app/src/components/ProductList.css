@@ -1,0 +1,7 @@
+.ProductListContainer {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /*products on 4 columns*/
+  gap: 20px;
+  margin-top: 20px;
+  padding: 0 50px;
+}

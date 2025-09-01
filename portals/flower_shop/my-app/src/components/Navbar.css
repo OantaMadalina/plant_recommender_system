@@ -1,0 +1,33 @@
+/* src/components/Navbar.css */
+.NavbarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 20px; /* Reduced padding */
+  background-color: #f8f8f8;
+  border-bottom: 1px solid #ddd;
+}
+
+.Logo {
+  font-size: 28px; /* Reduced font size */
+  color: #006600;
+  flex-grow: 1; /* Allow the logo to grow and take available space */
+  text-align: center; /* Center the text within the logo container */
+  margin-left: 180px; /* Adjust this value to move the logo to the right */
+}
+
+.NavLinks {
+  display: flex;
+  gap: 10px;
+}
+
+.NavLink {
+  background-color: #006600;
+  border-radius: 25px;
+  color: white;
+  border: none;
+  padding: 10px 25px; /* Increased padding */
+  font-size: 18px; /* Increased font size */
+  cursor: pointer;
+  margin-bottom: 0; /* Removed bottom margin */
+}

@@ -1,0 +1,15 @@
+PlantDataTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service}_${self:provider.stage}_plant
+    AttributeDefinitions:
+      - AttributeName: idPlant
+        AttributeType: S
+    KeySchema:
+      - AttributeName: idPlant
+        KeyType: HASH
+    BillingMode: PAY_PER_REQUEST
+    SSESpecification:
+      SSEEnabled: true
+      SSEType: KMS
+      KMSMasterKeyId: !Ref CMKDynamoDB

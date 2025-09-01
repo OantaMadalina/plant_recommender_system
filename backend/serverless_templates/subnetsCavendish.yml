@@ -1,0 +1,9 @@
+cavendishSubnets:
+  prod:
+    - subnet-0eb63f9855a4fe338 # cavendish-public-1
+    - subnet-0188e670e14e6528a # cavendish-public-2
+    - subnet-04712964609cbf9f9 # cavendish-public-3
+  other:
+    - subnet-0cf8fd292ca830c6d # cavendish-private-1
+    - subnet-068face4982f0cb62 # cavendish-private-2
+    - subnet-0aca05c0ffc06427c # cavendish-private-3

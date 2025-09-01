@@ -1,0 +1,184 @@
+parameters:
+- name: sequentialServerlessDeploy
+  type: boolean
+  default: false
+- name: rollbackEnabled
+  type: boolean
+  default: false
+
+- name: environments
+  displayName: environments
+  type: object
+  default:
+  - name: dev
+    approvalRequired: ''
+    dependsOnStage: ''
+
+- name: triggeredByRollback
+  type: boolean
+  default: false
+
+trigger: none
+
+pool: prod-cavendish-v2
+
+resources:
+  repositories:
+  - repository: integration-tests
+    name: cavendish-integration-testing
+    type: git
+
+variables:
+  - group: common-pipeline-secrets
+  - group: awsaccess
+  - group: deployed-versions
+  - name: testRepoRef
+    value: $[ resources.repositories['integration-tests'].ref ]
+
+stages:
+- ${{ each env in parameters.environments }}:
+  - stage: '${{ env.name }}'
+    displayName: '${{ env.name }}'
+    dependsOn: ${{ env.dependsOnStage }}
+    variables:
+      - name: stageName
+        value: ${{ env.name }}
+      - name: accessKey
+        value: $(awskey)
+      - name: secretKey
+        value: $(awssecretkey)
+      - name: pipelineId
+        value: $(System.DefinitionId)
+
+      # Nested variables are not supported in ADO which is why this is needed
+      # It would be ideal to use $($(stageName)_commit) to access these but it is not currently possible
+      - name: rollback_commit
+        value: $(dev_commit)
+      - name: rollback_branch
+        value: $(dev_branch)
+
+    jobs:
+    - job: 'wait_approval'
+      displayName: 'Waiting for approval'
+      pool: server
+      timeoutInMinutes: 4320
+      condition: or(ne('${{ variables.stageName }}', 'dev'), eq(${{ parameters.triggeredByRollback }}, 'true'))
+      steps:
+      - task: ManualValidation@0
+        timeoutInMinutes: 1440
+        inputs:
+          notifyUsers: |
+            ashley.martin@vodafone.com
+          instructions: 'Please validate the deployment and resume'
+          onTimeout: 'reject'
+
+    # Output a link to the git diffs of previous and current deploy in environment
+    - job: 'compare_diffs'
+      displayName: 'Link to deploy commit diffs'
+      steps:
+      - bash: |
+          echo "https://vfuk-digital.visualstudio.com/Cavendish/_git/Cavendish/branchCompare?baseVersion=GC$(rollback_commit)&targetVersion=GC$(build.sourceversion)&_a=files"
+        displayName: "Link to commit diffs"
+
+    - job: 'deploy_engine_${{ env.name }}'
+      dependsOn: ${{ env.approvalRequired }}
+      displayName: 'Deploy Bootcamp backend'
+      steps:
+      - script: |
+          python3.10 -m ensurepip --upgrade
+          python3.10 -m pip install msrest azure-devops
+        displayName: 'Installing pipeline run checker python modules'
+      - task: PythonScript@0
+        displayName: 'Checking for existing pipeline runs'
+        inputs:
+          scriptSource: 'filePath'
+          scriptPath: '$(System.DefaultWorkingDirectory)/shared/cicd/scripts/check_pipeline_runs.py'
+          pythonInterpreter: "/usr/bin/python3.10"
+        env:
+          PAT: $(PAT)
+      - script: python3.10 -m pip install --upgrade pip setuptools wheel boto3 psycopg2-binary==2.9.5 holidays==0.21.13
+        displayName: 'Install pip tools'
+      - script: |
+          python3.10 -m ensurepip --upgrade
+          python3.10 -m pip install -r requirements.txt -t python/lib/python3.10/site-packages
+        workingDirectory: '$(System.DefaultWorkingDirectory)/backend/dependencies/'
+        displayName: 'Install PY lambda deps'
+      - script: |
+          python3.10 -m pip install --ignore-installed -r requirements.txt
+        workingDirectory: '$(System.DefaultWorkingDirectory)/backend/dependencies/'
+        displayName: 'Install PY lambda deps inside the pipeline'
+      - task: Npm@1
+        displayName: Npm install serverless and datadog-ci
+        inputs:
+          command: 'install'
+          workingDir: '$(Build.SourcesDirectory)/backend/'
+      - script: |
+          echo $(git describe --long) > $(Build.SourcesDirectory)/backend/assets/VERSION
+          echo $PWD && ls -al && printf "%s\n%s\neu-west-1\njson" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | aws configure
+          $(Build.SourcesDirectory)/backend/node_modules/.bin/serverless create-cert \
+            --stage $(stageName) --region $AWS_REGION --config $(Build.SourcesDirectory)/backend/serverless.yml
+          export APPDYNAMICS_KEY=$(aws secretsmanager get-secret-value --secret-id Appdynamics | jq -r ".SecretString" | jq -r ".AppdynamicsAccessKey")
+          export APPDYNAMICS_DISABLED=true  # $([ $(stageName) == "qa" ] || [ $(stageName) == "prod" ] && echo "false" || echo "true")
+
+          $(Build.SourcesDirectory)/backend/node_modules/.bin/serverless deploy \
+            --stage $(stageName) --region $AWS_REGION --config $(Build.SourcesDirectory)/backend/serverless.yml
+        displayName: Deploy ${{ variables.stageName }} serverless stack
+        workingDirectory: '$(Build.SourcesDirectory)/backend'
+        env:
+          AWS_ACCESS_KEY_ID: $(accessKey)
+          AWS_SECRET_ACCESS_KEY: $(secretKey)
+          DATADOG_API_KEY: $(DATADOGAPIKEY)
+          DATADOG_APP_KEY: $(DATADOGAPPKEY)
+          ADO_VARIABLES_PAT:  $(PAT)
+          STAGE: $(stageName)
+          PAT: $(PAT)
+          #SLS_DEBUG: true
+
+      - task: Bash@3
+        condition: and(succeeded(), eq( '${{ variables.stageName }}', 'dev'))
+        displayName: 'Approve changesets'
+        inputs:
+          filePath: '$(System.DefaultWorkingDirectory)/backend/scripts/approve-changesets.sh'
+        env:
+          # bootcampengine-$(stageName)-til-api stack omitted. It does not use changeSets
+          STACK_NAMES: 'bootcampengine-$(stageName)'
+          AWS_ACCESS_KEY_ID: $(accessKey)
+          AWS_SECRET_ACCESS_KEY: $(secretKey)
+          SEQUENTIAL: ${{ parameters.sequentialServerlessDeploy }}
+
+      # - task: PythonScript@0
+      #   displayName: 'Creating required S3 directories'
+      #   condition: succeeded()
+      #   inputs:
+      #     scriptSource: 'filePath'
+      #     scriptPath: '$(System.DefaultWorkingDirectory)/backend/scripts/create_s3_directories.py'
+      #     pythonInterpreter: "/usr/bin/python3.10"
+      #   env:
+      #     AWS_ACCESS_KEY_ID: $(accessKey)
+      #     AWS_SECRET_ACCESS_KEY: $(secretKey)
+      #     STAGE: $(stageName)
+
+    # Run this job after test jobs finish OR test jobs are skipped
+    # Handles the rollback if enabled
+    # Handles updating deployed-versions variable group by default
+    # Depends on deployment completing successfully, and the test jobs if they are enabled
+    - job: 'check_status'
+      dependsOn:
+      - deploy_engine_${{ env.name }}
+      condition: and( always(), not(canceled()) )
+      displayName: 'Check Status'
+      variables:
+        dependenciesOutput: $[ convertToJson(dependencies) ]
+      steps:
+      - template: templates/check-status.yml
+        parameters:
+          rollback_branch: $(rollback_branch)
+          rollback_commit: $(rollback_commit)
+          rollbackEnabled: ${{ parameters.rollbackEnabled }}
+          dependenciesOutput: $(dependenciesOutput)
+          PAT: $(PAT)
+          stage: ${{ env.name }}
+          pipelineId: $(pipelineId)
+          STACK_NAMES: 'bootcampengine-$(stageName)'
+          AWS_ACCESS_KEY_ID: $(accessKey)
+          AWS_SECRET_ACCESS_KEY: $(secretKey)

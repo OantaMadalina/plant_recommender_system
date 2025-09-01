@@ -1,0 +1,27 @@
+.ProductDetailContainer {
+    padding: 20px;
+  }
+  
+  .ProductDetail {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .ProductDetail img {
+    max-width: 300px;
+    border-radius: 8px;
+  }
+  
+  .ProductInfo {
+    max-width: 600px;
+  }
+  
+  .ProductInfo h1 {
+    margin-top: 0;
+  }
+  
+  .ProductInfo p {
+    margin: 5px 0;
+  }
+  

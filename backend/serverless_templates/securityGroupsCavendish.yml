@@ -1,0 +1,13 @@
+cavendishSecurityGroups:
+  prod:
+    - sg-0fd1660f33490d97c # cavendish_general
+    - sg-06b9598bd7c38d4a5 # cavendish_developers
+    - sg-03dc64ab1f7363da1 # cavendish_ado_agents
+    - sg-0f750e284f891faa3 # cavendish_datadog
+    - sg-05a8b9e5480583534 # cavendish_external_services
+  other:
+    - sg-0e7f4349a8b2938c4 # cavendish_general
+    - sg-00d40b7c81947c830 # cavendish_developers
+    - sg-04ed7eecb1c4bdf51 # cavendish_ado_agents
+    - sg-0c5d94b48c08a385a # cavendish_datadog
+    - sg-048d8a41745afcf4b # cavendish_external_services

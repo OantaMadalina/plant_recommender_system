@@ -1,0 +1,53 @@
+/* .AppContainer {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+} */
+
+/* src/components/AdminHomePage.css */
+.AppContainer {
+  padding: 20px;
+}
+  
+.AddProductButton {
+  background-color: #006600;
+  border-radius: 25px;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+  
+.AddProductButton:hover {
+  background-color: #45a049;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline;
+  margin-right: 10px;
+}
+
+.product-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.product-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.HeaderImage {
+  width: 500px;
+  height: 100px;
+  display: block;
+  margin: 20px auto; /* Center the image horizontally */
+  
+}

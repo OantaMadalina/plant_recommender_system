@@ -1,0 +1,16 @@
+local_bin/
+venv/
+node_modules/
+__pycache__/
+.serverless/
+dependencies/python
+.env
+.direnv/
+.envrc
+/cov_html
+.coverage
+.vscode/
+tmp/
+certs/
+testing/cavendish/
+.DS_Store

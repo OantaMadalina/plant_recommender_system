@@ -1,0 +1,23 @@
+﻿Action_Code,Part_Number,Package_Name,Contract_Length,Contract_Length_UOM,LineRental_Amount,Vat_Code,Price_Rise_Amount1,Price_Rise_Amount2,Price_Rise_Amount3,OOC_Price_Rise
+I,109525,MIGRATION ONLY Vodafone Broadband and Home Phone Existing mobile customer FTR1,18,Months,7.5,0.2,0.75,0.075,,10
+I,109529,Vodafone Home Phone and FULL PRICE Superfast Fibre - Existing mobile customer - FTR1,18,Months,15,0.2,1.5,0.15,,10
+I,109915,Home Broadband Unlimited Fibre 38 and Phone Existing mobile customer FTR3 18 m,18,Months,23.3333,0.2,2.3333,0.2333,,10
+I,109916,Home Broadband Unlimited Fibre 76 and Phone Existing mobile customer FTR3 18 m,18,Months,27.5,0.2,2.75,0.275,,10
+I,120070,36mth Band 4 Tablet Laptop Business Plan 25GB,36,Months,21,0.2,2.1,0.21,0.021,10
+I,120077,36mth Band 5 Tablet Laptop Business Plan Unlimited Max,36,Months,32.5,0.2,3.25,0.325,0.0325,10
+I,120095,36mth Band 7 Tablet Laptop Business Plan 25GB,36,Months,15.5,0.2,1.55,0.155,0.0155,10
+I,119985,24 Month Unlimited Max Xtra Euro Roam Data Plan I,24,Months,25,0.2,2.5,0.25,,10
+I,119986,24 Month Unlimited Max Xtra Euro Roam Data Plan B,24,Months,21.6667,0.2,2.1667,0.2167,,10
+I,119989,36 Month 1GB Business Xtra Euro Roam Data Plan I,36,Months,7.5,0.2,0.75,0.075,0.0075,10
+I,117805,24mth 4GB Data Plan,24,Months,8.3333,0.2,0.8333,0.0833,,10
+I,117807,24mth 25GB Data Plan,24,Months,12.5,0.2,1.25,0.125,,10
+I,119600,OneNumber Watch Connectivity Plan 24 month I,24,Months,4.1667,0.2,0.4167,0.0417,,10
+I,117808,24mth 100GB Data Plan,24,Months,16.6667,0.2,1.6667,0.1667,,10
+I,117124,Business Pro II Fibre 1 24m,24,Months,32.5,0.2,3.25,0.325,,10
+I,117127,Business Pro II Fibre 2  24m,24,Months,36.11,0.2,3.611,0.3611,,10
+I,117809,24mth Unlimited Max Data Plan,24,Months,25,0.2,2.5,0.25,,10
+I,120434,12 Month 3GB Xtra Global Roam SIMO Plan,12,Months,12.5,0.2,1.25,,,10
+I,120436,12 Month 8GB Xtra Global Roam SIMO Plan,12,Months,4.1667,0.2,0.4167,,,10
+I,120438,12 Month 25GB Xtra Global Roam SIMO Plan,12,Months,16.6667,0.2,1.6667,,,10
+I,120439,12 Month 80GB Xtra Global Roam SIMO Plan,12,Months,32.5,0.2,3.25,,,10
+I,120446,12 Month 8GB Xtra Global Roam SIMO Plan with Entertainment,12,Months,36.11,0.2,3.611,,,10

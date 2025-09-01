@@ -1,0 +1,162 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool: prod-cavendish-v2
+
+variables:
+  - group: awsaccess
+  - name: awsRegion
+    value: 'eu-west-1'
+
+  - name: stageName
+    value: '$(Build.SourceBranchName)'
+  - name: accessKey
+    ${{ if eq(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awskeyprod)
+    ${{ if ne(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awskey)
+  - name: secretKey
+    ${{ if eq(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awssecretkeyprod)
+    ${{ if ne(variables['Build.SourceBranchName'], 'prod') }}:
+      value: $(awssecretkey)
+
+stages:
+- stage: 'Build_Validation'
+  displayName: 'PR Build Validation'
+  jobs:
+
+  - job: CheckChangesPython
+    displayName: 'Check changes - Python'
+    steps:
+      - bash: |
+          PATH_FILTER_PY=".py"
+          RUN_PY=false
+          echo $(git fetch --all --tags)
+          echo $(git diff --name-only)
+          CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
+          MATCH_COUNT=0
+
+          echo "Checking for file changes..."
+          for FILE in $CHANGED_FILES
+          do
+            if [[ $FILE == *$PATH_FILTER_PY* ]]; then
+              echo "MATCH:  ${FILE} changed"
+              RUN_PY=true
+              MATCH_COUNT=$(($MATCH_COUNT+1))
+              echo "Run python scripts only"
+            else
+              echo "IGNORE: ${FILE} changed"
+            fi
+          done
+
+          if [[ $MATCH_COUNT -gt 0 ]] && [[ $RUN_PY=true ]]; then
+            echo "$MATCH_COUNT match(es) for filter '$PATH_FILTER_PY' found."
+            echo "##vso[task.setvariable variable=SOURCE_CODE_CHANGED;isOutput=true]true"
+          else
+            echo "##vso[task.setvariable variable=SOURCE_CODE_CHANGED;isOutput=true]false"
+          fi
+        name: check_changes
+        displayName: 'Check changed files'
+
+  - job: 'Code_Validation'
+    displayName : 'Linting and Unit Tests Validation'
+    dependsOn: CheckChangesPython # Mark previous job as dependency
+    condition: eq(dependencies.CheckChangesPython.outputs['check_changes.SOURCE_CODE_CHANGED'], 'true')
+    steps:
+    - template: templates/steps/pr-validation-tests.yml
+
+  # - job: 'WhiteSource_Scanning'
+  #   displayName: 'WhiteSource Scanning'
+  #   timeoutInMinutes: 20
+  #   steps:
+  #   - task: Npm@1
+  #     displayName: Npm install
+  #     inputs:
+  #       command: 'install'
+  #       workingDir: '$(Build.SourcesDirectory)/backend/'
+  #   - task: WhiteSource@21
+  #     condition: Always()
+  #     timeoutInMinutes: 15
+  #     continueOnError: true
+  #     inputs:
+  #       cwd: '$(System.DefaultWorkingDirectory)/backend/'
+  #       projectName: 'Cavendish-Backend'
+
+  - job: 'SonarQube_Scanning'
+    displayName: 'SonarQube Scanning'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    # Prepare Analysis Configuration task
+    - task: SonarQubePrepare@5
+      inputs:
+        SonarQube: 'VF SonarQube'
+        scannerMode: 'CLI'
+        configMode: 'manual'
+        cliProjectKey: 'vfgroup-tvoisroswe-cavendish'
+    # Run Code Analysis task
+    - task: SonarQubeAnalyze@5
+
+    # Publish Quality Gate Result task
+    - task: SonarQubePublish@5
+      condition: Always()
+      timeoutInMinutes: 5
+      continueOnError: true
+      inputs:
+        pollingTimeoutSec: '300'
+
+  - job: CheckChangesServerless
+    displayName: 'Check changes - Serverless'
+    steps:
+      - bash: |
+          PATH_FILTER="serverless"
+          CHANGED_FILES=$(git diff HEAD HEAD~ --name-only)
+          MATCH_COUNT=0
+
+          echo "Checking for file changes..."
+          for FILE in $CHANGED_FILES
+          do
+            if [[ $FILE == *$PATH_FILTER* ]]; then
+              echo "MATCH:  ${FILE} changed"
+              MATCH_COUNT=$(($MATCH_COUNT+1))
+            else
+              echo "IGNORE: ${FILE} changed"
+            fi
+          done
+
+          echo "$MATCH_COUNT match(es) for filter '$PATH_FILTER' found."
+          if [[ $MATCH_COUNT -gt 0 ]]; then
+            echo "##vso[task.setvariable variable=SOURCE_CODE_CHANGED;isOutput=true]true"
+          else
+            echo "##vso[task.setvariable variable=SOURCE_CODE_CHANGED;isOutput=true]false"
+          fi
+        name: check_changes_serverless
+        displayName: 'Check changed files for Serverless'
+
+  - job: 'Serverless_Validation'
+    displayName: 'Serverless Validation'
+    dependsOn: CheckChangesServerless # Mark previous job as dependency
+    condition: eq(dependencies.CheckChangesServerless.outputs['check_changes_serverless.SOURCE_CODE_CHANGED'], 'true')
+    steps:
+    - task: Npm@1
+      displayName: Npm install
+      inputs:
+        command: 'install'
+        workingDir: '$(Build.SourcesDirectory)/backend/'
+    # --stage param and DATADOG_API_KEY have dummy values, the serverless commands are used only
+    # for template validation
+    - script: |
+        echo $PWD && ls -al && printf "%s\n%s\neu-west-1\njson" "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | aws configure
+        $(Build.SourcesDirectory)/backend/node_modules/.bin/serverless package \
+          --stage test --region $(awsRegion) --config $(Build.SourcesDirectory)/backend/serverless.yml \
+        && $(Build.SourcesDirectory)/backend/node_modules/.bin/serverless package \
+          --stage test --region $(awsRegion) --config $(Build.SourcesDirectory)/backend/serverless-til-api.yml
+      env:
+        AWS_ACCESS_KEY_ID: $(accessKey)
+        AWS_SECRET_ACCESS_KEY: $(secretKey)
+        DD_PLUGIN_ENABLED: false
+      displayName: Validate ${{ variables.stageName }} serverless templates
+      workingDirectory: '$(Build.SourcesDirectory)/backend'

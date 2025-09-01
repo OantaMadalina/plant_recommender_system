@@ -1,0 +1,58 @@
+.Card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 90%; /* Make the card take the full width of its grid cell */
+  height: 430px; /* Set a fixed height for the cards */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ProductImage {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+}
+
+.ProductInfo {
+  padding: 10px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.ProductName {
+  font-size: 18px;
+  margin: 0;
+  flex-grow: 1;
+}
+
+.ProductPrice {
+  color: #006600;
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.ProductLocation {
+  font-size: 14px;
+  color: #777;
+}
+
+.DeleteButton {
+  background-color: #2e5e38;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: fit-content; /* Ensure the button width adjusts to its content */
+  font-size: 14px; /* Ensure the font size is readable */
+}
+
+.DeleteButton:hover {
+  background-color: #018401;
+}

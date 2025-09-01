@@ -1,0 +1,521 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background-color: white; /* Set a background color to avoid gaps */
+}
+
+.background-image {
+  width: 900px; /* Adjust the width as needed */
+  height: auto;
+  position: absolute;
+  top: 0px; /* Adjust the top position as needed */
+}
+
+.plant-animation {
+  position: absolute;
+  bottom: 60px; /* Adjust this value to move the plant animation higher */
+  left: 50%;
+  transform: translateX(-50%) scale(1.8);
+  z-index: 1;
+}
+
+.plant.plant-one .stem {
+  width: 113px;
+  height: 127px;
+  border: solid 2px #2e5e38;
+  border-color: #2e5e38 transparent transparent;
+  border-radius: 50%/20px 13px 0 0;
+  transform: rotate(73deg);
+  position: absolute;
+  left: -78px; /* Adjusted to move left by 20px */
+  top: 13px;
+}
+
+.plant.plant-two .stem {
+  width: 88px;
+  height: 123px;
+  border: solid 2px #2e5e38;
+  border-color: #2e5e38 transparent transparent;
+  border-radius: 50%/11px 13px 0 0;
+  transform: rotate(291deg);
+  position: absolute;
+  left: 87px; /* Adjusted to move left by 20px */
+  top: 28px;
+}
+
+.plant.plant-three .stem {
+  width: 74px;
+  height: 161px;
+  border: solid 2px #2e5e38;
+  border-color: #2e5e38 transparent transparent;
+  border-radius: 50%/11px 13px 0 0;
+  transform: rotate(46deg);
+  position: absolute;
+  left: -79px; /* Adjusted to move left by 20px */
+  top: 57px;
+}
+
+.pot {
+  position: relative;
+}
+
+.pot .top {
+  height: 5px;
+  width: 85px;
+  background: #5fc7d1;
+  display: block;
+  margin: 106px auto 0;
+  border-radius: 10px;
+}
+
+.pot span.shape {
+  height: 40px;
+  width: 80px;
+  background: #8fd5db;
+  display: block;
+  margin: auto;
+  border-radius: 0 0 30px 30px;
+  overflow: hidden;
+}
+
+.pot span.base {
+  height: 3px;
+  width: 45px;
+  background: #5fc7d1;
+  display: block;
+  margin: -2px auto 0;
+  border-radius: 10px;
+  z-index: 4;
+  position: relative;
+}
+
+.shadow {
+  height: 15px;
+  width: 79px;
+  background: #373a31;
+  border-radius: 50%;
+  margin: auto;
+  z-index: -1;
+  position: relative;
+  top: -8px;
+}
+
+.petals span {
+  background: #2e5e38;
+  display: block;
+  position: absolute;
+  border-radius: 50% 50%;
+}
+
+.plant.plant-one .petals span:first-child {
+  height: 24px;
+  width: 7px;
+  left: 36px; /* Adjusted to move left by 20px */
+  top: 79px;
+  transform: rotate(301deg);
+}
+
+.plant.plant-one .petals span:nth-child(2) {
+  height: 21px;
+  width: 6px;
+  left: 34px; /* Adjusted to move left by 20px */
+  top: 64px;
+  transform: rotate(297deg);
+}
+
+.plant.plant-one .petals span:nth-child(3) {
+  height: 20px;
+  width: 6px;
+  left: 31px; /* Adjusted to move left by 20px */
+  top: 50px;
+  transform: rotate(294deg);
+}
+
+.plant.plant-one .petals span:nth-child(4) {
+  height: 17px;
+  width: 6px;
+  left: 27px; /* Adjusted to move left by 20px */
+  top: 37px;
+  transform: rotate(288deg);
+}
+
+.plant.plant-one .petals span:nth-child(5) {
+  height: 16px;
+  width: 5px;
+  left: 22px; /* Adjusted to move left by 20px */
+  top: 25px;
+  transform: rotate(290deg);
+}
+
+.plant.plant-one .petals span:nth-child(6) {
+  height: 16px;
+  width: 5px;
+  left: 14px; /* Adjusted to move left by 20px */
+  top: 12px;
+  transform: rotate(289deg);
+}
+
+.plant.plant-one .petals span:nth-child(7) {
+  height: 16px;
+  width: 5px;
+  left: 22px; /* Adjusted to move left by 20px */
+  top: 4px;
+  transform: rotate(190deg);
+}
+
+.plant.plant-one .petals span:nth-child(8) {
+  height: 16px;
+  width: 5px;
+  left: 30px; /* Adjusted to move left by 20px */
+  top: 16px;
+  transform: rotate(190deg);
+}
+
+.plant.plant-one .petals span:nth-child(9) {
+  height: 17px;
+  width: 6px;
+  left: 37px; /* Adjusted to move left by 20px */
+  top: 27px;
+  transform: rotate(204deg);
+}
+
+.plant.plant-one .petals span:nth-child(10) {
+  height: 20px;
+  width: 6px;
+  left: 44px; /* Adjusted to move left by 20px */
+  top: 41px;
+  transform: rotate(208deg);
+}
+
+.plant.plant-one .petals span:nth-child(11) {
+  height: 21px;
+  width: 6px;
+  left: 49px; /* Adjusted to move left by 20px */
+  top: 55px;
+  transform: rotate(208deg);
+}
+
+.plant.plant-one .petals span:nth-child(12) {
+  height: 21px;
+  width: 6px;
+  left: 52px; /* Adjusted to move left by 20px */
+  top: 71px;
+  transform: rotate(215deg);
+}
+
+.plant.plant-two .petals span:first-child {
+  height: 22px;
+  width: 7px;
+  left: 73px; /* Adjusted to move left by 20px */
+  top: 85px;
+  transform: rotate(254deg);
+}
+
+.plant.plant-two .petals span:nth-child(2) {
+  height: 21px;
+  width: 6px;
+  left: 77px; /* Adjusted to move left by 20px */
+  top: 71px;
+  transform: rotate(261deg);
+}
+
+.plant.plant-two .petals span:nth-child(3) {
+  height: 20px;
+  width: 6px;
+  left: 81px; /* Adjusted to move left by 20px */
+  top: 58px;
+  transform: rotate(261deg);
+}
+
+.plant.plant-two .petals span:nth-child(4) {
+  height: 18px;
+  width: 5px;
+  left: 86px; /* Adjusted to move left by 20px */
+  top: 47px;
+  transform: rotate(258deg);
+}
+
+.plant.plant-two .petals span:nth-child(5) {
+  height: 15px;
+  width: 5px;
+  left: 90px; /* Adjusted to move left by 20px */
+  top: 38px;
+  transform: rotate(258deg);
+}
+
+.plant.plant-two .petals span:nth-child(6) {
+  height: 12px;
+  width: 4px;
+  left: 95px; /* Adjusted to move left by 20px */
+  top: 32px;
+  transform: rotate(265deg);
+}
+
+.plant.plant-two .petals span:nth-child(7) {
+  height: 24px;
+  width: 7px;
+  left: 57px; /* Adjusted to move left by 20px */
+  top: 69px;
+  transform: rotate(325deg);
+}
+
+.plant.plant-two .petals span:nth-child(8) {
+  height: 21px;
+  width: 6px;
+  left: 63px; /* Adjusted to move left by 20px */
+  top: 57px;
+  transform: rotate(321deg);
+}
+
+.plant.plant-two .petals span:nth-child(9) {
+  height: 18px;
+  width: 5px;
+  left: 69px; /* Adjusted to move left by 20px */
+  top: 47px;
+  transform: rotate(321deg);
+}
+
+.plant.plant-two .petals span:nth-child(10) {
+  height: 15px;
+  width: 5px;
+  left: 75px; /* Adjusted to move left by 20px */
+  top: 38px;
+  transform: rotate(321deg);
+}
+
+.plant.plant-two .petals span:nth-child(11) {
+  height: 14px;
+  width: 5px;
+  left: 81px; /* Adjusted to move left by 20px */
+  top: 31px;
+  transform: rotate(339deg);
+}
+
+.plant.plant-two .petals span:nth-child(12) {
+  height: 12px;
+  width: 4px;
+  left: 88px; /* Adjusted to move left by 20px */
+  top: 26px;
+  transform: rotate(344deg);
+}
+
+.plant.plant-three .petals span:first-child {
+  height: 24px;
+  width: 7px;
+  left: 13px; /* Adjusted to move left by 20px */
+  top: 85px;
+  transform: rotate(250deg);
+}
+
+.plant.plant-three .petals span:nth-child(2) {
+  height: 22px;
+  width: 7px;
+  left: 4px; /* Adjusted to move left by 20px */
+  top: 75px;
+  transform: rotate(246deg);
+}
+
+.plant.plant-three .petals span:nth-child(3) {
+  height: 20px;
+  width: 6px;
+  left: -5px; /* Adjusted to move left by 20px */
+  top: 66px;
+  transform: rotate(250deg);
+}
+
+.plant.plant-three .petals span:nth-child(4) {
+  height: 18px;
+  width: 5px;
+  left: -13px; /* Adjusted to move left by 20px */
+  top: 60px;
+  transform: rotate(253deg);
+}
+
+.plant.plant-three .petals span:nth-child(5) {
+  height: 16px;
+  width: 5px;
+  left: -6px; /* Adjusted to move left by 20px */
+  top: 49px;
+  transform: rotate(179deg);
+}
+
+.plant.plant-three .petals span:nth-child(6) {
+  height: 18px;
+  width: 6px;
+  left: 3px; /* Adjusted to move left by 20px */
+  top: 52px;
+  transform: rotate(187deg);
+}
+
+.plant.plant-three .petals span:nth-child(7) {
+  height: 22px;
+  width: 6px;
+  left: 12px; /* Adjusted to move left by 20px */
+  top: 57px;
+  transform: rotate(182deg);
+}
+
+.plant.plant-three .petals span:nth-child(8) {
+  height: 22px;
+  width: 7px;
+  left: 21px; /* Adjusted to move left by 20px */
+  top: 66px;
+  transform: rotate(188deg);
+}
+
+.plant.plant-three .petals span:nth-child(9) {
+  height: 22px;
+  width: 7px;
+  left: 31px; /* Adjusted to move left by 20px */
+  top: 77px;
+  transform: rotate(198deg);
+}
+
+.pattern {
+  position: relative;
+}
+
+.pattern span {
+  background: #2f8ab7;
+  display: block;
+  border-radius: 100%;
+  position: absolute;
+}
+
+.pattern span:first-child {
+  height: 38px;
+  width: 15px;
+  left: 40%;
+  top: 9px;
+}
+
+.pattern span:nth-child(2) {
+  height: 29px;
+  width: 12px;
+  left: 18px;
+  top: 15px;
+  transform: rotate(-32deg);
+}
+
+.pattern span:nth-child(3) {
+  height: 29px;
+  width: 12px;
+  right: 19px;
+  top: 15px;
+  transform: rotate(32deg);
+}
+
+.pattern span:nth-child(4) {
+  height: 23px;
+  width: 10px;
+  left: 10px;
+  top: 25px;
+  transform: rotate(302deg);
+}
+
+.pattern span:nth-child(5) {
+  height: 23px;
+  width: 10px;
+  right: 11px;
+  top: 25px;
+  transform: rotate(-302deg);
+}
+
+@keyframes swing {
+  0% {
+    transform: rotate(3deg);
+  }
+
+  100% {
+    transform: rotate(-3deg);
+  }
+}
+
+@keyframes swing-1 {
+  0% {
+    transform: rotate(2deg);
+  }
+
+  100% {
+    transform: rotate(-2deg);
+  }
+}
+
+@keyframes swing-2 {
+  0% {
+    transform: rotate(-3deg);
+  }
+
+  100% {
+    transform: rotate(3deg);
+  }
+}
+
+.plant.plant-one,
+.plant.plant-two,
+.plant.plant-three {
+  position: absolute;
+  display: flex;
+  height: 120px;
+  width: 120px;
+  transform-origin: bottom;
+}
+
+.plant.plant-one {
+  animation: swing ease-in-out 3s infinite alternate;
+}
+
+.plant.plant-two {
+  animation: swing-1 ease-in-out 3s infinite alternate;
+}
+
+.plant.plant-three {
+  animation: swing-2 ease-in-out 3.5s infinite alternate;
+}
+
+.login-box {
+  background: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px; /* Adjust the width as necessary */
+  z-index: 2; /* Ensure the login box is above the plants */
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+input {
+  display: block;
+  margin: 10px auto;
+  padding: 10px;
+  width: 80%;
+  max-width: 300px;
+}
+
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+  background-color: #2e5e38; /* Adjust the button color as necessary */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}

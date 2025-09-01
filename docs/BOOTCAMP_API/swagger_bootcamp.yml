@@ -1,0 +1,398 @@
+openapi: 3.0.0
+
+security:
+  - ApiKeyAuth: []
+    ApiIdAuth: []
+
+
+info:
+  title: Mid-Contract Price Rise API
+  version: 1.0.0
+
+paths:
+  /calculateMCPR:
+    post:
+      summary: Calculates the MCPR (Mid-Contract Price Rise)
+      description: >
+        Calculates the MCPR (Mid-Contract Price Rise).
+        It receives a list of plans and discounts, returning for each plan a list with information about price increases due to annual price rise
+        or discount drop-off.
+        \
+
+        Header validation errors:
+        * 243 - Invalid payload
+        * 244 - Body field '<field_name>' is required
+        * 245 - Body field '<field_name>' must be <data_type>
+        * 108 - Invalid Origin
+        * 109 - Invalid Customer Segment
+        * 500 - Internal server error
+
+        Plan line validations:
+        * 175 - Invalid Date
+        * 246 - Invalid Service Type
+        * 248 - Invalid Plan ID
+
+      tags:
+        - MCPR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalculateMCPRRequest'
+            example:
+              origin: "3"
+              segment: "CONS"
+              orderLineItems:
+              - rowId: 1
+                planId: "119914"
+                serviceType: "PAYM"
+                estimatedOrderCompletionDate: "2024-02-15"
+                discountProductIds: ["600100"]
+                billingDate: "2024-01-10"
+              - rowId: 2
+                planId: "123457"
+                serviceType: "HBB"
+                estimatedOrderCompletionDate: "2024-08-17"
+                billingDate: "2024-01-10"
+      responses:
+        '200':
+          description: Successful / partially successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculateMCPRResponse'
+              examples:
+                Successful response:
+                  value:
+                    status: SUCCESS
+                    mcprAmounts:
+                    - rowId: "1"
+                      planId: "119914"
+                      outOfContractRate: 10
+                      planPriceRises:
+                        - totalNetAmount: 15.0
+                          totalGrossAmount: 18.0
+                          startDate: "2024-02-15"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 15.0
+                          totalGrossAmount: 18.0
+                          startDate: "2024-03-31"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 18.0
+                          totalGrossAmount: 21.6
+                          startDate: "2024-04-10"
+                          type: "ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 33.0
+                          totalGrossAmount: 39.6
+                          startDate: "2024-05-15"
+                          discountProductIds: ["600100"]
+                          type: "DISCOUNT_DROP_OFF"
+                        - totalNetAmount: 33.0
+                          totalGrossAmount: 39.6
+                          startDate: "2025-03-31"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 36.5
+                          totalGrossAmount: 43.8
+                          startDate: "2025-04-10"
+                          type: "ANNUAL_PRICE_RISE"
+                      planPriceRiseAmounts:
+                        - netAmount: 3.0
+                          grossAmount: 3.6
+                          startDate: "2024-04-10"
+                          type: "ANNUAL_PRICE_RISE_INCREMENT"
+                        - netAmount: 3.5
+                          grossAmount: 4.2
+                          startDate: "2025-04-10"
+                          type: "ANNUAL_PRICE_RISE_INCREMENT"
+                    - rowId: "2"
+                      planId: "123457"
+                      outOfContractRate: 10
+                      planPriceRises:
+                        - totalNetAmount: 30.0
+                          totalGrossAmount: 36.0
+                          startDate: "2024-02-15"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 30.0
+                          totalGrossAmount: 36.0
+                          startDate: "2024-03-31"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 33.0
+                          totalGrossAmount: 39.6
+                          startDate: "2024-04-10"
+                          type: "ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 33.0
+                          totalGrossAmount: 39.6
+                          startDate: "2025-03-31"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 36.5
+                          totalGrossAmount: 43.8
+                          startDate: "2025-04-10"
+                          type: "ANNUAL_PRICE_RISE"
+                      planPriceRiseAmounts:
+                        - netAmount: 3.0
+                          grossAmount: 3.6
+                          startDate: "2024-04-10"
+                          type: "ANNUAL_PRICE_RISE_INCREMENT"
+                        - netAmount: 3.5
+                          grossAmount: 4.2
+                          startDate: "2025-04-10"
+                          type: "ANNUAL_PRICE_RISE_INCREMENT"
+
+                Partial success:
+                  value:
+                    status: PARTIAL_SUCCESS
+                    mcprAmounts:
+                    - rowId: "1"
+                      planId: "119914"
+                      outOfContractRate: 10
+                      planPriceRises:
+                        - totalNetAmount: 15.0
+                          totalGrossAmount: 18.0
+                          startDate: "2024-02-15"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 15.0
+                          totalGrossAmount: 18.0
+                          startDate: "2024-03-31"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 18.0
+                          totalGrossAmount: 21.6
+                          startDate: "2024-04-10"
+                          type: "ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 33.0
+                          totalGrossAmount: 39.6
+                          startDate: "2024-05-15"
+                          discountProductIds: ["600100"]
+                          type: "DISCOUNT_DROP_OFF"
+                        - totalNetAmount: 33.0
+                          totalGrossAmount: 39.6
+                          startDate: "2025-03-31"
+                          type: "PRE_ANNUAL_PRICE_RISE"
+                        - totalNetAmount: 36.5
+                          totalGrossAmount: 43.8
+                          startDate: "2025-04-10"
+                          type: "ANNUAL_PRICE_RISE"
+                      planPriceRiseAmounts:
+                        - netAmount: 3.0
+                          grossAmount: 3.6
+                          startDate: "2024-04-10"
+                          type: "ANNUAL_PRICE_RISE_INCREMENT"
+                        - netAmount: 3.5
+                          grossAmount: 4.2
+                          startDate: "2025-04-10"
+                          type: "ANNUAL_PRICE_RISE_INCREMENT"
+                    - rowId: "2"
+                      planId: "123457"
+                      errors:
+                        - message: "Invalid Plan ID"
+                          code: "248"
+
+        '400':
+          description: Failed request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculateMCPRResponse'
+              examples:
+                Failed request:
+                  value:
+                    status: FAIL
+                    errors:
+                      - message: "Body field 'planId' is required"
+                        code: "244"
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculateMCPRResponse'
+              example:
+                status: FAIL
+                errors:
+                  - message: "Internal server error"
+                    code: "500"
+
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+    ApiIdAuth:
+      type: apiKey
+      in: header
+      name: X-Apigw-Api-Id
+
+  schemas:
+    OrderLineItem:
+      type: object
+      properties:
+        rowId:
+          type: string
+          description: Row identifier. Not required for upgrades via AOM
+        planId:
+          type: string
+          description: ID of the plan for which MCPR is to be calculated
+        serviceType:
+          type: string
+          enum: [PAYM, MBB, HBB]
+          description: Type of service
+        estimatedOrderCompletionDate:
+          type: string
+          description: CRD for HBB estimated installation date / pre-order and back-order date for PAYM, MBB
+        discountProductIds:
+          type: array
+          description: List of discount product IDs applied to the plan
+          items:
+            type: string
+        billingDate:
+          type: string
+          description: Billing date for existing customers with additional lines/upgrades (yyyy-MM-dd)
+          example: "2024-02-15"
+      required:
+        - planId
+
+    CalculateMCPRRequest:
+      type: object
+      properties:
+        origin:
+          type: string
+          description: The client sending the request
+        segment:
+          type: string
+          description: The customer segment
+        orderLineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderLineItem'
+      required:
+        - origin
+        - segment
+        - orderLineItems
+
+    PriceRiseAmountItem:
+      type: object
+      properties:
+        netAmount:
+          type: number
+          format: double
+          description: Price rise amount (ex-Vat amount)
+          example: 5.5000
+        grossAmount:
+          type: number
+          format: double
+          description: Price rise amount (inc-Vat amount)
+          example: 6.6000
+        startDate:
+          type: string
+          description: Start date of the price rise (yyyy-MM-dd)
+          example: "2024-04-01"
+        type:
+          type: string
+          enum: [ANNUAL_PRICE_RISE_INCREMENT]
+          description: Type of price rise
+          example: "ANNUAL_PRICE_RISE_INCREMENT"
+      required:
+        - netAmount
+        - grossAmount
+        - startDate
+        - type
+
+    PlanPriceRiseItem:
+      type: object
+      properties:
+        totalNetAmount:
+          type: number
+          format: double
+          description: Total plan price (ex-Vat amount)
+          example: 30.5
+        totalGrossAmount:
+          type: number
+          format: double
+          description: Total plan price (inc-Vat amount)
+          example: 36.6
+        startDate:
+          type: string
+          description: Start date of the total plan price (yyyy-MM-dd)
+          example: "2024-04-01"
+        discountProductIds:
+          type: array
+          description: The discount products (SKU) for which the drop-off is applied
+          items:
+            type: string
+          example: ["600100", "600200"]
+        type:
+          type: string
+          enum: [PRE_ANNUAL_PRICE_RISE, ANNUAL_PRICE_RISE, ANNUAL_PRICE_RISE_DISCOUNT_DROP_OFF, DISCOUNT_DROP_OFF]
+          description: Type of price rise
+          example: "ANNUAL_PRICE_RISE"
+      required:
+        - totalNetAmount
+        - totalGrossAmount
+        - startDate
+        - type
+
+    MCPRAmount:
+      type: object
+      properties:
+        rowId:
+          type: string
+          description: Row identifier. Not required for upgrades via AOM, Chordiant
+        planId:
+          type: string
+          description: ID of the plan for which MCPR is to be calculated
+        outOfContractRate:
+          type: number
+          description: Out of contract rate (percentage)
+          example: 10
+        planPriceRises:
+          type: array
+          description: List of plan price rises
+          items:
+            $ref: '#/components/schemas/PlanPriceRiseItem'
+        planPriceRiseAmounts:
+          type: array
+          description: List of annual price rise amounts
+          items:
+            $ref: '#/components/schemas/PriceRiseAmountItem'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorResponse'
+      required:
+        - planId
+
+    CalculateMCPRResponse:
+      type: object
+      properties:
+        mcprAmounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/MCPRAmount'
+        status:
+          type: string
+          description: Status of the processed request
+          example: "SUCCESS"
+          enum: ["SUCCESS", "FAIL", "PARTIAL_SUCCESS"]
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorResponse'
+      required:
+        - status
+
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+      required:
+        - message
+        - code

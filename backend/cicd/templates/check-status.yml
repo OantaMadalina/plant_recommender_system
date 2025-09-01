@@ -1,0 +1,123 @@
+parameters:
+  - name: "rollback_branch"
+    type: "string"
+    displayName: "The name of the branch to rollback to"
+  - name: "rollback_commit"
+    type: "string"
+    displayName: "The commit id to rollback to"
+  - name: "rollbackEnabled"
+    type: "string"
+    displayName: "If rollback is enabled or not"
+  - name: "dependenciesOutput"
+    type: "string"
+    displayName: "The json output of the dependent jobs"
+  - name: "PAT"
+    type: "string"
+    displayName: "Personal Access token for azure devops"
+  - name: "stage"
+    type: "string"
+    displayName: "The current pipeline stage"
+  - name: "pipelineId"
+    type: "string"
+    displayName: "The current pipeline ID"
+  - name: "AWS_ACCESS_KEY_ID"
+    type: "string"
+    displayName: "AWS access key"
+  - name: "AWS_SECRET_ACCESS_KEY"
+    type: "string"
+    displayName: "AWS secret access key"
+  - name: "STACK_NAMES"
+    type: "string"
+    displayName: "List of stack names"
+
+steps:
+# Loop through the stacks and check their statuses
+- task: Bash@3
+  displayName: 'Check stack statuses'
+  inputs:
+    filePath: '$(System.DefaultWorkingDirectory)/backend/scripts/check_stack_status.sh'
+  env:
+    STACK_NAMES: ${{ parameters.STACK_NAMES }}
+    AWS_ACCESS_KEY_ID: ${{ parameters.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ parameters.AWS_SECRET_ACCESS_KEY }}
+
+# Loop through the outputs of the test jobs checking for failures, sets the variable flags depending on the outcome
+- bash: |
+    jobOutputs=$(echo '${{ parameters.dependenciesOutput }}' | jq -c -r '.[].outputs')
+    for output in ${jobOutputs[@]}; do
+    echo $output
+      if [[ "$output" =~ .*"failed".* ]]; then
+          echo "Test failure detected in dependent tests"
+          echo "##vso[task.setvariable variable=rollback]true"
+          exit
+      fi
+    done
+
+    echo "No test failures detected in any dependent tests"
+    echo "##vso[task.setvariable variable=update_deployed_version]true"
+  displayName: "Check test outputs"
+
+# In the event that tests fail but rollback is disabled, we still want to update the deployed version in ADO
+- bash: |
+    echo "Test failure detected but rollback is disabled so updating deployed version variable group"
+    echo "##vso[task.setvariable variable=update_deployed_version]true"
+  displayName: "Set deployed version variable"
+  condition: and(eq(variables['rollback'], 'true'), ne(${{ parameters.rollbackEnabled }}, 'true'))
+
+# If rollback has been triggered, show the rollback information
+- bash: |
+    echo "A Pipeline test failed, starting rollback to last successfully deployed version"
+    echo "Branch: $(rollback_branch)"
+    echo "Commit: $(rollback_commit)"
+  displayName: "Rollback Information"
+  condition: and(eq(variables['rollback'], 'true'), eq(${{ parameters.rollbackEnabled }}, 'true'))
+
+# Start the rollback with the last deployed branch and commit
+- task: PythonScript@0
+  displayName: 'Triggering Rollback'
+  condition: and(eq(variables['rollback'], 'true'), eq(${{ parameters.rollbackEnabled }}, 'true'))
+  inputs:
+    scriptSource: 'filePath'
+    scriptPath: '$(System.DefaultWorkingDirectory)/backend/scripts/trigger_rollback_pipeline.py'
+    pythonInterpreter: "/usr/bin/python3"
+  env:
+    PAT: $(PAT)
+    PIPELINE_ID: $(pipelineId)
+    BRANCH: $(rollback_branch)
+    COMMIT: $(rollback_commit)
+
+# Check to see if the stacks failed to deploy, if they have, fail the pipeline
+- bash: |
+    echo "One of the cloud formation stacks failed to deploy"
+    echo "Deployment was a failure"
+    exit 1
+  condition: eq(variables['deployment_failed'], 'true')
+  displayName: "Stacks deployed successfully"
+
+# If tests run successfully, or no tests are run but deployment is successful update var group with latest commit and branch info
+# This is run regardless of whether rollback is enabled or not so as to keep an up to date commit for the environment
+- task: PythonScript@0
+  displayName: 'Updating deployed version variable group'
+  condition: and(succeeded(), eq(variables['update_deployed_version'], 'true'))
+  inputs:
+    scriptSource: 'filePath'
+    scriptPath: '$(System.DefaultWorkingDirectory)/shared/cicd/scripts/update_deployed_var_group.py'
+    pythonInterpreter: "/usr/bin/python3"
+  env:
+    PAT: ${{ parameters.PAT }}
+    STAGE: ${{ parameters.stage}}
+    GROUP_ID: "34932"
+    GROUP_NAME: "deployed-versions"
+    BRANCH: $(build.SourceBranch)
+    COMMIT: $(build.sourceversion)
+    
+- task: WorkItemUpdater@2
+  displayName: 'Change task status to "Ready for Test"'
+  condition: and(succeeded(), eq( '${{parameters.stage }}', 'dev'))
+  inputs:
+    workitemsSource: 'Build'
+    workItemType: 'User Story,Task,Bug,Technical Improvement2'
+    workItemState: 'Ready for Test'
+    workItemCurrentState: 'Development Complete'
+    linkBuild: true
+    updateAssignedToWith: 'FixedUser'
