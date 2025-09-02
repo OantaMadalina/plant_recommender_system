@@ -1,0 +1,1453 @@
+service: bootcampengine
+useDotenv: true
+configValidationMode: warn
+provider:
+  name: aws
+  stage: ${opt:stage}
+  region: ${opt:region}
+  deploymentMethod: direct
+  runtime: python3.10
+  memorySize: 512
+  timeout: 5
+  stackTags: &TAGS
+    Project: "BOOTCAMP"
+    ManagedBy: "gdcpubliccloudmgmt@vodafone.com"
+    CostCenter: "123"
+    Confidentiality: "C2"
+    TaggingVersion: "V2.2"
+    SecurityZone: "DEV"
+    Environment: "${self:custom.environmentTag.${opt:stage}, self:custom.environmentTag.other}"
+    Domain: "RetailAndLogistics"
+    Department: "Logistics"
+  apiGateway:
+    shouldStartNameWithService: true
+    metrics: true
+    usagePlan:
+      throttle:
+        burstLimit: 200
+        rateLimit: 100
+  logs:
+    restApi:
+      fullExecutionData: true
+      accessLogging: true
+      executionLogging: true
+  environment:
+    APPDYNAMICS_ACCOUNT_NAME: ${param:appdynamicsAccountName}
+    APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY: ${env:APPDYNAMICS_KEY, ''}
+    APPDYNAMICS_APPLICATION_NAME: "BOOTCAMP-${opt:stage}"
+    APPDYNAMICS_CONTROLLER_HOST: ${param:appdynamicsControllerHost}
+    APPDYNAMICS_SERVERLESS_API_ENDPOINT: https://fra-sls-agent-api.saas.appdynamics.com
+    APPDYNAMICS_LOG_LEVEL: ERROR
+    APPDYNAMICS_DISABLE_AGENT: ${env:APPDYNAMICS_DISABLED, 'true'}
+
+  s3:
+    bootcampBucket:
+      name: ${self:service}-${self:provider.stage}
+
+package:
+  excludeDevDependencies: false
+  individually: false
+  patterns:
+    - "!dependencies/**"
+    - "!tmp/**"
+    - "!scripts/**"
+    - "!certs/**"
+    - "!local_bin/**"
+    - "!share/**"
+    - "!docs/**"
+    - "!iam/**"
+    - "!resources/**"
+    - "!test/**"
+    - "!venv/**"
+    - "!.venv/**"
+    - "!node_modules/**"
+    - "!integration_testing/**"
+    - "!.pytest_cache/**"
+    - "!cov_html/**"
+    - "!.direnv/**"
+    - assets/**
+    - services/**
+    - cavendish_lib/**
+    - services/**
+    - "!**/__pycache__/**"
+    - "!local-scripts/**"
+    - "!serverless_plugins/**"
+    - "!til_api_resources/**"
+    - "!upgrade_scripts/**"
+    - "!testing/**"
+    - "!cicd/**"
+    - "!package-lock.json"
+    - "!package.json"
+
+plugins:
+  - serverless-cloudformation-sub-variables
+  - serverless-python-requirements
+  - serverless-certificate-creator
+  - serverless-domain-manager
+  - serverless-iam-roles-per-function
+  - serverless-s3-remover
+  - serverless-apigw-binary
+  - serverless-plugin-datadog
+  - serverless-dependson-plugin
+  - serverless-prune-plugin
+params:
+  default:
+    appdynamicsAccountName: vodafoneuk-dev
+    appdynamicsControllerHost: vodafoneuk-dev.saas.appdynamics.com
+    mftAccount: "016329010806"
+    s3LoggingBucket: "399396145059-s3logging"
+    vpcEndpointId: "vpce-01a258b5978d4323b"
+    hostedZoneId: "Z0389021K571CXAITMQP"
+    cognitoUserPool: arn:aws:cognito-idp:eu-west-1:399396145059:userpool/eu-west-1_OJtdqlfbA
+
+custom:
+  prune:
+    automatic: true
+    includeLayers: true
+    number: 10
+  dependsOn:
+    # Groups lambdas into chains using `dependsOn` to make CloudFormation deploy them sequencially
+    # and prevent internal Rate Exceded exceptions
+    enabled: false
+    chains: 5
+
+  # Associate API GW to specified WAF. Empty string to remove association
+  wafID:
+    other: ""
+  vars:
+    aws-devops-user:
+      other: azure-devops
+    adoVariablesPAT: ${env:ADO_VARIABLES_PAT, ''}
+
+  mftUserId:
+    other: "AROAQHTKI5Z3CCDWZ47CQ:*"
+
+  # Security groups used in the BOOTCAMP VPC
+  # ${self:custom.bootcampSubnets.${opt:stage}, self:custom.bootcampSubnets.other}
+  bootcampSecurityGroups: ${file(serverless_templates/securityGroupsCavendish.yml):cavendishSecurityGroups}
+  # ${self:custom.bootcampSubnets.${opt:stage}, self:custom.bootcampSubnets.other}
+  bootcampSubnets: ${file(serverless_templates/subnetsCavendish.yml):cavendishSubnets}
+
+  # Datadog Lambda Python integration
+  datadog:
+    apiKey: ${env:DATADOG_API_KEY, ''}
+    site: datadoghq.eu
+    enabled: ${strToBool(${env:DD_PLUGIN_ENABLED, true})}
+
+  environmentTag: ${file(serverless_templates/environmentTags.yml):environmentTag}
+
+  pythonRequirements:
+    useDownloadCache: true
+    useStaticCache: true
+
+  defaultStage: dev
+  defaultRegion: eu-west-1
+  stage: ${opt:stage, self:custom.defaultStage}
+  region: ${opt:region, self:custom.defaultRegion}
+
+  domains:
+    tld: cavendish.digital
+    other: api-bootcamp-${self:custom.stage}.${self:custom.domains.tld}
+
+  fqdn: ${self:custom.domains.${self:custom.stage}, self:custom.domains.other}
+
+  domainsCreateRecord:
+    other: true
+
+  customDomain:
+    domainName: ${self:custom.fqdn}
+    # certificateArn: '${certificate:${self:custom.customCertificate.certificateName}:CertificateArn}'
+    certificateName: ${self:custom.fqdn}
+    hostedZoneId: ${param:hostedZoneId}
+    autoDomain: true
+    basePath: ""
+    stage: "${self:custom.stage}"
+    createRoute53Record: ${self:custom.domainsCreateRecord.${self:custom.stage}, self:custom.domainsCreateRecord.other}
+    createRoute53IPv6Record: false
+
+  customCertificate:
+    certificateName: "${self:custom.fqdn}"
+    #idempotencyToken: ${self:custom.domains.${self:custom.stage}}
+    writeCertInfoToFile: true
+    certInfoFileName: "certs/${self:provider.stage}/cert-info.yml"
+    hostedZoneNames: "${self:custom.domains.tld}."
+    region: us-east-1
+    tags:
+      <<: *TAGS
+      Name: "${self:custom.fqdn}"
+    rewriteRecords: false
+
+  remover:
+    buckets:
+      - ${self:service}-${self:provider.stage}
+
+  apigwBinary:
+    types:
+      - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+      - text/plain
+
+layers:
+  dependencies:
+    path: dependencies
+    name: ${self:service}_${self:provider.stage}_dependencies
+    description: Application dependencies
+    compatibleRuntimes:
+      - python3.10
+    retain: false
+
+functions:
+  GetApiCallExampleFunction:
+    name: ${self:service}-${self:provider.stage}_calculate-bootcamp
+    description: Calculates mid contract price rise
+    handler: services/bootcamp/lambda_calculate_bootcamp.calculate_bootcamp_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp # TODO think of a better microservice name
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    events:
+      - http:
+          method: GET
+          path: /calculate
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_calculate-bootcamp
+    iamRoleStatements:
+      - ${file(iam/TariffPlansTableIAM.yml):TariffPlansTableIAM}
+    tags:
+      pagerduty-service: orders
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetSongsAPIFunction:
+    name: ${self:service}-${self:provider.stage}_get-songs
+    description: Fetches the songs for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_get_songs.get_songs_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /songs
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-songs
+    iamRoleStatements:
+      - ${file(iam/SongsTableIAM.yml):SongsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  UpsertSongAPIFunction:
+    name: ${self:service}-${self:provider.stage}_upsert-song
+    description: Upserts a song for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_upsert_song.upsert_song_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: POST
+          path: /songs
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_upsert-song
+    iamRoleStatements:
+      - ${file(iam/SongsTableIAM.yml):SongsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  RemoveSongAPIFunction:
+    name: ${self:service}-${self:provider.stage}_remove-song
+    description: Removes a song for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_remove_song.remove_song_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: DELETE
+          path: /songs/{songId}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_remove-song
+    iamRoleStatements:
+      - ${file(iam/SongsTableIAM.yml):SongsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  InsertSongLocationAPIFunction:
+    name: ${self:service}-${self:provider.stage}_insert-song-location
+    description: Inserts a song location for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_insert_song_location.insert_song_location_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: POST
+          path: /song-locations
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_insert-song-location
+    iamRoleStatements:
+      - ${file(iam/SongsTableIAM.yml):SongsTableIAM}
+      - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetSongLocationsAPIFunction:
+    name: ${self:service}-${self:provider.stage}_get-song-locations
+    description: Fetches the song locations for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_get_song_locations.get_song_locations_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /song-locations/{songId}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-song-locations
+    iamRoleStatements:
+      - ${file(iam/SongsTableIAM.yml):SongsTableIAM}
+      - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  RemoveSongLocationAPIFunction:
+    name: ${self:service}-${self:provider.stage}_remove-song-location
+    description: Removes a song location for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_remove_song_location.remove_song_location_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: DELETE
+          path: /song-locations/{songId}/{locationId}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_remove-song-location
+    iamRoleStatements:
+      - ${file(iam/SongsTableIAM.yml):SongsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  UploadLocationImageFunction:
+    name: ${self:service}-${self:provider.stage}_upload-location-image
+    description: Inserts a location for the Music Dashboard Bootcamp Project through an API call.
+    handler: services/music_dashboard/lambda_upload_location_image.upload_location_image_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: PUT
+          path: /song-locations/upload/{filename}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_upload-location-image
+    iamRoleStatements:
+      - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  HoroscopeProcessDataFiles:
+    name: ${self:service}-${self:provider.stage}_horoscope-process-data-files
+    description: Process horoscope data files.
+    handler: services/horoscope/lambda_process_horoscope_data_files.process_horoscope_data_file_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 1024
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - s3:
+          bucket: bootcampBucket
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: Horoscope/Data
+            - suffix: .csv
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_process_horoscope_data_files
+    iamRoleStatements:
+    - ${file(iam/HoroscopeDataTableIAM.yml):HoroscopeDataTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    - ${file(iam/HoroscopeStatsTableIAM.yml):HoroscopeStatsTableIAM}
+
+  HoroscopeBucketUplpad:
+    name: ${self:service}-${self:provider.stage}_horoscope-bucket-upload
+    description: Upload horoscope data files.
+    handler: services/horoscope/lambda_horoscope_bucket_upload.horoscope_bucket_upload_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+    timeout: 30
+    memorySize: 1024
+    events:
+      - http:
+          method: POST
+          path: /horoscopeUpload/{filename}
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+          request:
+            parameters:
+              paths:
+                filename: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_horoscope_bucket_upload
+    iamRoleStatements:
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+
+  GetHoroscopeData:
+    name: ${self:service}-${self:provider.stage}_get-horoscope
+    description: Return horoscope based on sign and prediction type.
+    handler: services/horoscope/lambda_get_horoscope.get_horoscope_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /horoscope
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get_horoscope_data
+    iamRoleStatements:
+    - ${file(iam/HoroscopeDataTableIAM.yml):HoroscopeDataTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  HoroscopeUploadRating:
+    name: ${self:service}-${self:provider.stage}_horoscope-upload-rating
+    description: Upload the horoscope rating.
+    handler: services/horoscope/lambda_upload_horoscope_rating.horoscope_upload_rating_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+    timeout: 90
+    memorySize: 1024
+    events:
+      - http:
+          method: POST
+          path: /horoscopeUploadRating
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_horoscope_upload_rating
+    iamRoleStatements:
+    - ${file(iam/HoroscopeRatingTableIAM.yml):HoroscopeRatingTableIAM}
+
+  ToggleHoroscopeReportFunction:
+    name: ${self:service}-${self:provider.stage}_toggle-horoscope-rating-report
+    description: Generate daily/weekly report based on users ratings.
+    handler: services/horoscope/lambda_toggle_horoscope_rating_report.horoscope_rating_report_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+    timeout: 600
+    events:
+      - schedule:
+          name: WeeklyHoroscopeReportTrigger
+          description: Triggers the report generation Lambda weekly.
+          rate: cron(0 0 ? * 1 *)
+          input:
+            type: "weekly"
+      - schedule:
+          name: MonthlyHoroscopeReportTrigger
+          description: Triggers the report generation Lambda monthly.
+          rate: cron(0 0 1 * ? *)
+          input:
+            type: "monthly"
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_toggle-horoscope-rating
+    iamRoleStatements:
+    - ${file(iam/HoroscopeRatingTableIAM.yml):HoroscopeRatingTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+
+  GetHoroscopeStatistics:
+    name: ${self:service}-${self:provider.stage}_get-horoscope-stats
+    description: Return latest dates for horoscope review and predictions.
+    handler: services/horoscope/lambda_get_horoscope_stats.get_horoscope_stats_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /horoscopeStats
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get_horoscope_stats
+    iamRoleStatements:
+    - ${file(iam/HoroscopeStatsTableIAM.yml):HoroscopeStatsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  DownloadHoroscopeReports:
+    name: ${self:service}-${self:provider.stage}_download-horoscope-reports
+    description: Download latest weekly or monthly horoscope report.
+    handler: services/horoscope/lambda_download_horoscope_reports.download_horoscope_reports_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: POST
+          path: /downloadHoroscopeReports/{type}
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+          request:
+            parameters:
+              paths:
+                type: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_download_horoscope_reports
+    iamRoleStatements:
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    - ${file(iam/HoroscopeStatsTableIAM.yml):HoroscopeStatsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetFootballPlayersFunction:
+    name: ${self:service}-${self:provider.stage}_get-football-players
+    description: Return a list of football players from the football players table, filtered by id or name.
+    handler: services/football_dashboard/lambda_get_football_players.get_football_players_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /footballPlayers
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-football-players
+    iamRoleStatements:
+    - ${file(iam/FootballPlayersTableIAM.yml):FootballPlayersTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetFootballTeamsFunction:
+    name: ${self:service}-${self:provider.stage}_get-football-teams
+    description: Return a list of football teams from the football teams table, filtered by id or name.
+    handler: services/football_dashboard/lambda_get_football_teams.get_football_teams_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /footballTeams
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-football-teams
+    iamRoleStatements:
+    - ${file(iam/FootballTeamsTableIAM.yml):FootballTeamsTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetStadiumsFunction:
+    name: ${self:service}-${self:provider.stage}_get-stadiums
+    description: Return a list of stadiums from the stadiums table, filtered by id or name.
+    handler: services/football_dashboard/lambda_get_stadiums.get_stadiums_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /stadiums
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-stadiums
+    iamRoleStatements:
+    - ${file(iam/StadiumsTableIAM.yml):StadiumsTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetWorkoutListFunction:
+    name: ${self:service}-${self:provider.stage}_list-workouts
+    description: Lists all workouts from the DynamoDB table
+    handler: services/workout_tracker/lambda_get_workouts.get_workouts_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    events:
+      - http:
+          method: GET
+          path: /workouts
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_list-workouts
+    iamRoleStatements:
+    - ${file(iam/WorkoutsTableIAM.yml):WorkoutsTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+
+  AddWorkoutFunction:
+    name: ${self:service}-${self:provider.stage}_add-workout
+    description: Adds a new workout to the DynamoDB table
+    handler: services/workout_tracker/lambda_add_workout.add_workout_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    events:
+      - http:
+          method: POST
+          path: /workouts
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_add-workout
+    iamRoleStatements:
+    - ${file(iam/WorkoutsTableIAM.yml):WorkoutsTableIAM}
+    - ${file(iam/WorkoutExercicesTableIAM.yml):WorkoutExercicesTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetWorkoutDetailsFunction:
+    name: ${self:service}-${self:provider.stage}_get-workout-details
+    description: Retrieves detailed workout information based on workout ID
+    handler: services/workout_tracker/lambda_get_workout_details.get_workout_details_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+    events:
+      - http:
+          method: GET
+          path: /workouts/{id}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-workout-details
+    iamRoleStatements:
+    - ${file(iam/WorkoutsTableIAM.yml):WorkoutsTableIAM}
+    - ${file(iam/WorkoutExercicesTableIAM.yml):WorkoutExercicesTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetExercisesFunction:
+    name: ${self:service}-${self:provider.stage}_get-exercises
+    description: Retrieves exercises based on category or muscle group to help users find relevant exercises when adding a new workout.
+    handler: services/workout_tracker/lambda_get_exercises.get_exercises_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer }
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    events:
+      - http:
+          method: GET
+          path: /exercises
+          request:
+            parameters:
+              querystrings:
+                category: false
+                muscleGroup: false
+                exerciseName: false
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-exercises
+    iamRoleStatements:
+    - ${file(iam/WorkoutExercicesTableIAM.yml):WorkoutExercicesTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetFootballGamesFunction:
+    name: ${self:service}-${self:provider.stage}_get-football-games
+    description: Return a list of games from the games' table, either not filtered or filtered by name.
+    handler: services/football_dashboard/lambda_get_football_games.get_football_games_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /footballGames
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-football-games
+    iamRoleStatements:
+    - ${file(iam/FootballGamesTableIAM.yml):FootballGamesTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  CreateFootballGameFunction:
+    name: ${self:service}-${self:provider.stage}_create-football-game
+    description: Creates a football game.
+    handler: services/football_dashboard/lambda_create_football_game.create_football_game_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: POST
+          path: /footballGame
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_create-football-game
+    iamRoleStatements:
+    - ${file(iam/FootballGamesTableIAM.yml):FootballGamesTableIAM}
+    - ${file(iam/FootballTeamsTableIAM.yml):FootballTeamsTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  UpdateFootballGameFunction:
+    name: ${self:service}-${self:provider.stage}_update-football-game
+    description: Updates the fields of a football game.
+    handler: services/football_dashboard/lambda_update_football_game.update_football_game_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: PUT
+          path: /footballGames/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_update-football-game
+    iamRoleStatements:
+    - ${file(iam/FootballGamesTableIAM.yml):FootballGamesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  DeleteFootballGameFunction:
+    name: ${self:service}-${self:provider.stage}_delete-football-game
+    description: Deletes a football game by its ID
+    handler: services/football_dashboard/lambda_delete_football_game.delete_football_game_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: DELETE
+          path: /footballGames/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_delete-football-game
+    iamRoleStatements:
+    - ${file(iam/FootballGamesTableIAM.yml):FootballGamesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetFootballStandingsFunction:
+    name: ${self:service}-${self:provider.stage}_get-football-standings
+    description: Return a list of position and other details for each team.
+    handler: services/football_dashboard/lambda_get_football_standings.get_football_standings_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /footballStandings
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-football-standings
+    iamRoleStatements:
+    - ${file(iam/FootballGamesTableIAM.yml):FootballGamesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetFootballTopScorersFunction:
+    name: ${self:service}-${self:provider.stage}_get-football-top-scorers
+    description: Return a list of top scorers.
+    handler: services/football_dashboard/lambda_get_football_top_scorers.get_football_top_scorers_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /footballTopScorers
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-football-top-scorers
+    iamRoleStatements:
+    - ${file(iam/FootballGamesTableIAM.yml):FootballGamesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetPlantDataFunction:
+    name: ${self:service}-${self:provider.stage}_get-plant-data
+    description: Return a list of plants data.
+    handler: services/flower_shop/lambda_get_plant_data.get_plant_data_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: GET
+          path: /plantData
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get-plant-data
+    iamRoleStatements:
+    - ${file(iam/PlantDataTableIAM.yml):PlantDataTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+  
+  CreateRecipeFunction:
+    name: ${self:service}-${self:provider.stage}_create-recipe
+    description: Creates a food recipe.
+    handler: services/recipe_share/lambda_create_recipe.create_recipe_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    timeout: 30
+    memorySize: 640
+    events:
+      - http:
+          method: POST
+          path: /recipes
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_create_recipe
+    iamRoleStatements:
+    - ${file(iam/FoodRecipesTableIAM.yml):FoodRecipesTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetRecipesFunction:
+    name: ${self:service}-${self:provider.stage}_get-recipes
+    description: Get all food recipes.
+    handler: services/recipe_share/lambda_get_recipes.get_recipes_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    timeout: 30
+    memorySize: 640
+    events:
+      - http:
+          method: GET
+          path: /recipes
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get_recipes
+    iamRoleStatements:
+    - ${file(iam/FoodRecipesTableIAM.yml):FoodRecipesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  GetRecipeByIdFunction:
+    name: ${self:service}-${self:provider.stage}_get-recipe_by_id
+    description: Get the details of one recipe.
+    handler: services/recipe_share/lambda_get_recipe_by_id.get_recipe_by_id_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    timeout: 90
+    memorySize: 640
+    events:
+      - http:
+          method: GET
+          path: /recipes/{id}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_get_recipe_by_id
+    iamRoleStatements:
+    - ${file(iam/FoodRecipesTableIAM.yml):FoodRecipesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  DeleteRecipeFunction:
+    name: ${self:service}-${self:provider.stage}_delete-recipe
+    description: Delete a recipe.
+    handler: services/recipe_share/lambda_delete_recipe.delete_recipe_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    timeout: 30
+    memorySize: 640
+    events:
+      - http:
+          method: DELETE
+          path: /recipes/{id}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_delete_recipe
+    iamRoleStatements:
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    - ${file(iam/FoodRecipesTableIAM.yml):FoodRecipesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  UpdateRecipeFunction:
+    name: ${self:service}-${self:provider.stage}_update-recipe
+    description: Update a food recipe.
+    handler: services/recipe_share/lambda_update_recipe.update_recipe_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+      aws_account_id: { Ref: AWS::AccountId }
+      DISABLE_TIL: ${ssm:/BOOTCAMP/${self:provider.stage}/lambda/disable-TIL-interface, null}
+    timeout: 30
+    memorySize: 640
+    events:
+      - http:
+          method: PUT
+          path: /recipes/{id}
+          private: true
+          cors: true
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_update_recipe
+    iamRoleStatements:
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    - ${file(iam/FoodRecipesTableIAM.yml):FoodRecipesTableIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+  DeletePlantFunction:
+    name: ${self:service}-${self:provider.stage}_delete-plant
+    description: Deletes a plant by its ID
+    handler: services/flower_shop/lambda_delete_plant.delete_plant_handler
+    layers:
+      - { Ref: DependenciesLambdaLayer}
+    package: {}
+    memorySize: 640
+    environment:
+      environment: ${self:service}_${self:provider.stage}_
+      POWERTOOLS_SERVICE_NAME: bootcamp
+      aws_account_id: { Ref: AWS::AccountId }
+      BOOTCAMP_BUCKET: ${self:service}-${self:provider.stage}
+    events:
+      - http:
+          method: DELETE
+          path: /plant/{id}
+          request:
+            parameters:
+              paths:
+                id: true
+          private: true
+          cors: true
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId: !Ref ApiGatewayAuthorizer
+    iamRoleStatementsName: ${self:service}_${self:provider.stage}_role_delete-plant
+    iamRoleStatements:
+    - ${file(iam/PlantDataTableIAM.yml):PlantDataTableIAM}
+    - ${file(iam/BootcampBucketIAM.yml):BootcampBucketIAM}
+    tags:
+      error-priority: event-orchestration
+      service-stack: "bootcamp"
+
+resources:
+  # Associate API Gateway to WAF if wafID is not empty
+  Conditions:
+    AssociateWaf:
+      Fn::Not:
+        - Fn::Equals:
+            - ${self:custom.wafID.${opt:stage}, self:custom.wafID.other}
+            - ""
+
+  Resources:
+    CMKDynamoDB: ${file(resources/CMKDynamoDB.yml):CMKDynamoDB}
+
+    CMKDynamoDBAlias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/bootcamp-${self:provider.stage}/dynamodb
+        TargetKeyId: !Ref CMKDynamoDB
+
+    CMKSecretsManager: ${file(resources/CMKSecretsManager.yml):CMKSecretsManager}
+
+    CMKSecretsManagerAlias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/bootcamp-${self:provider.stage}/secretsmanager
+        TargetKeyId: !Ref CMKSecretsManager
+
+    CMKSQS: ${file(resources/CMKSQS.yml):CMKSQS}
+
+    CMKSQSAlias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/bootcamp-${self:provider.stage}/sqs
+        TargetKeyId: !Ref CMKSQS
+
+    CMKS3: ${file(resources/CMKS3.yml):CMKS3}
+
+    CMKS3Alias:
+      Type: AWS::KMS::Alias
+      Properties:
+        AliasName: alias/bootcamp-${self:provider.stage}/s3
+        TargetKeyId: !Ref CMKS3
+
+    ServerlessDeploymentBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        LoggingConfiguration:
+          DestinationBucketName: "${param:s3LoggingBucket}"
+          LogFilePrefix: 's3\${self:provider.stage}-serverlessDeployBucketEngine'
+
+    ServerlessDeploymentBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        PolicyDocument:
+          Statement:
+            - Sid: EnforceHttpsAlways
+              Effect: Deny
+              Principal: "*"
+              Action: "*"
+              Resource:
+                - "arn:aws:s3:::#{ServerlessDeploymentBucket}"
+                - "arn:aws:s3:::#{ServerlessDeploymentBucket}/*"
+              Condition:
+                Bool:
+                  aws:SecureTransport: "false"
+        Bucket:
+          Ref: ServerlessDeploymentBucket
+
+    S3RoleTIL:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: ${self:service}_${self:provider.stage}_mft_role
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "s3.amazonaws.com"
+              Action:
+                - "sts:AssumeRole"
+        Path: "/"
+
+    BootcampBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      DependsOn: ServerlessDeploymentBucket
+      Properties:
+        PolicyDocument:
+          Statement:
+            - Sid: EnforceHttpsAlways
+              Effect: Deny
+              Principal: "*"
+              Action: "*"
+              Resource:
+                - "arn:aws:s3:::#{S3BucketBootcampBucket}"
+                - "arn:aws:s3:::#{S3BucketBootcampBucket}/*"
+              Condition:
+                Bool:
+                  aws:SecureTransport: "false"
+            - Sid: BucketPolicyForTransferFamily
+              Effect: Allow
+              Principal:
+                AWS: "arn:aws:iam::${param:mftAccount}:root"
+              Action:
+                - "s3:PutObject"
+                - "s3:PutObjectAcl"
+                - "s3:GetObject"
+                - "s3:DeleteObjectVersion"
+                - "s3:DeleteObject"
+                - "s3:GetObjectVersion"
+                - "s3:ListBucket"
+                - "s3:GetBucketLocation"
+              Resource:
+                - "arn:aws:s3:::#{S3BucketBootcampBucket}"
+                - "arn:aws:s3:::#{S3BucketBootcampBucket}/*"
+              Condition:
+                StringLike:
+                  "aws:userId": ${self:custom.mftUserId.${opt:stage}, self:custom.mftUserId.other}
+        Bucket:
+          Ref: S3BucketBootcampBucket
+
+    S3BucketBootcampBucket: ${file(resources/S3BucketBootcampBucket.yml):S3BucketBootcampBucket}
+
+    TariffPlansTable: ${file(resources/TariffPlansTable.yml):TariffPlansTable}
+    FootballTeamsTable: ${file(resources/FootballTeamsTable.yml):FootballTeamsTable}
+    StadiumsTable: ${file(resources/StadiumsTable.yml):StadiumsTable}
+    FootballPlayersTable: ${file(resources/FootballPlayersTable.yml):FootballPlayersTable}
+    SongsTable: ${file(resources/SongsTable.yml):SongsTable}
+    HoroscopeDataTable: ${file(resources/HoroscopeDataTable.yml):HoroscopeDataTable}
+    HoroscopeRatingTable: ${file(resources/HoroscopeRatingTable.yml):HoroscopeRatingTable}
+    HoroscopeStatsTable: ${file(resources/HoroscopeStatsTable.yml):HoroscopeStatsTable}
+    WorkoutsTable: ${file(resources/WorkoutsTable.yml):WorkoutsTable}
+    WorkoutExercicesTable: ${file(resources/WorkoutExercicesTable.yml):WorkoutExercicesTable}
+    RegionsTable: ${file(resources/RegionsTable.yml):RegionsTable}
+    FootballGamesTable: ${file(resources/FootballGamesTable.yml):FootballGamesTable}
+    PlantDataTable: ${file(resources/PlantDataTable.yml):PlantDataTable}
+    FoodRecipesTable: ${file(resources/FoodRecipesTable.yml):FoodRecipesTable}
+
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}-${self:provider.stage}
+        # EndpointConfiguration:
+        #   Types:
+        #     - PRIVATE
+        #   VpcEndpointIds:
+        #     - ${param:vpcEndpointId}
+        # Policy:
+        #   Version: '2012-10-17'
+        #   Statement:
+        #     - Effect: Allow
+        #       Principal: '*'
+        #       Action: 'execute-api:Invoke'
+        #       Resource: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:*/*'
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
+
+    WebACLAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      Condition: "AssociateWaf"
+      DependsOn:
+        - ApiGatewayRestApi
+        - ApiGatewayUsagePlan
+      Properties:
+        ResourceArn:
+          Fn::Join:
+            - "/"
+            - - "arn:aws:apigateway:${opt:region}::"
+              - restapis
+              - Ref: ApiGatewayRestApi
+              - "stages"
+              - "${opt:stage}"
+        WebACLArn: "${self:custom.wafID.${opt:stage}, self:custom.wafID.other}"
+
+    ApiGatewayRestApiKey:
+      Type: AWS::ApiGateway::ApiKey
+      Properties:
+        Name: ${self:service}_${self:provider.stage}_apikey
+        Value: "1334567891234567891112${self:provider.stage}"
+        Description: "Key for ${self:provider.stage}"
+        Enabled: true
+
+    # ApiGatewayAuthorizer:
+    #   Type: AWS::ApiGateway::Authorizer
+    #   Properties:
+    #     Name: ${self:service}_${self:provider.stage}_authorizer
+    #     Type: COGNITO_USER_POOLS
+    #     IdentitySource: method.request.header.Authorization
+    #     RestApiId:
+    #       Ref: ApiGatewayRestApi
+    #     ProviderARNs:
+    #       - ${param:cognitoUserPool}
+
+    UsagePlanKey:
+      Type: AWS::ApiGateway::UsagePlanKey
+      DependsOn:
+        - ApiGatewayUsagePlan
+      Properties:
+        KeyId:
+          Ref: ApiGatewayRestApiKey
+        KeyType: API_KEY
+        UsagePlanId:
+          Ref: ApiGatewayUsagePlan
+
+    APIKeyQuotaAlarmTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}_${self:provider.stage}-apiquota-alarm-topic
+        DisplayName: ${self:service}_${self:provider.stage}-apiquota-alarm-topic
+        Subscription:
+          - Protocol: email
+            Endpoint: Cavendish@internal.vodafone.com
+          - Protocol: email
+            Endpoint: andrei.chitu@vodafone.com
+          - Protocol: email
+            Endpoint: bianca.oprea1@vodafone.com
+          - Protocol: email
+            Endpoint: ashley.martin@vodafone.com
+
+  Outputs:
+    apiGatewayRestApiId:
+      Value: !Ref ApiGatewayRestApi
+      Export:
+        Name: ${self:service}-${self:provider.stage}-APIGW-restApiId
+
+    apiGatewayRestApiRootResourceId:
+      Value: !GetAtt ApiGatewayRestApi.RootResourceId
+      Export:
+        Name: ${self:service}-${self:provider.stage}-APIGW-rootResourceId
+
+    # apiGatewayAuthorizer:
+    #   Value: !Ref ApiGatewayAuthorizer
+    #   Export:
+    #     Name: ${self:service}-${self:provider.stage}-APIGW-authorizer
+
+    apiKey:
+      Value: !Ref ApiGatewayRestApiKey
+      Export:
+        Name: ${self:service}-${self:provider.stage}-APIGW-apiKey
+
+    secretsCmkArn:
+      Value: !GetAtt CMKSecretsManager.Arn
+      Export:
+        Name: ${self:service}-${self:provider.stage}-CMK-secrets-arn
