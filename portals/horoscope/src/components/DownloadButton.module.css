@@ -1,0 +1,19 @@
+.download-button{
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-family: fantasy;
+    font-weight: bold;
+    border: 1px solid;
+    border-color: orange;
+    border-radius: 4px;
+    width: 150px;
+}
+
+.download-instructions{
+    color: white;
+}
+

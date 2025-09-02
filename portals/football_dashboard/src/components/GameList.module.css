@@ -1,0 +1,40 @@
+.gameList {
+    min-height: 76vh;
+    width: 80%;
+    margin: 2vh auto;
+    padding: 20px;
+    /* border: 2px solid #ffffff; */
+    border-radius: 10px;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    width: 100%;
+}
+
+.createButton {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: block;
+    width: fit-content;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.createButton:hover {
+    background-color: #0e5416;
+}
+
+.createButton:active {
+    background-color: #284612;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+}

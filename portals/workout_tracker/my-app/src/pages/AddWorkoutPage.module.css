@@ -1,0 +1,28 @@
+.container {
+    padding: 20px;
+  }
+
+  .mainContent {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: var(--text-color);
+  }
+
+  .addWorkoutLink {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 15px;
+    background-color: var(--button-bg);
+    color: var(--button-text-color);
+    text-decoration: none;
+    border-radius: 5px;
+  }
+
+  .addWorkoutLink:hover {
+    background-color: var(--button-hover-bg);
+  }

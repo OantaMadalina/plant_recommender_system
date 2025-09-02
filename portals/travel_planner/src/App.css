@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&display=swap');
+@import url('https://fonts.google.com/share?selection.family=Great+Vibes|Rock+Salt');
+
+
+.App {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f8f4; 
+  font-family: 'Roboto', sans-serif; 
+}
+
+header {
+  background-color:white;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Dancing Script', cursive; 
+  color: #4a5d23;
+  margin: 0;
+}
+
+h1 {
+  font-size: 3.5em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 2.5em;
+  border-bottom: 3px solid #4a5d23; 
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+h3 {
+  font-size: 2em;
+  margin-bottom: 15px;
+}
+
+h4 {
+  font-size: 1.75em;
+  margin-bottom: 15px;
+}
+
+
+.regions, .recommended-destinations {
+  padding: 20px 20px;
+}
+
+.regions-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.region-card, .destination-card {
+  width: 23%;
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.destination-card:hover {
+  transform: translateY(-5px);
+  cursor: pointer;
+}
+
+.region-card h3, .destination-card h3 {
+  font-size: 1.8em;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.region-card p, .destination-card p {
+  font-size: 1.3em;
+  color: #3c4c24;
+  margin-bottom: 10px;
+}
+
+.region-image, .destination-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.button {
+  padding: 10px 20px;
+  background-color: #799943;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #8baf4d;
+}
+
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.region-detail p {
+  text-align: center;
+  padding: 25px;
+  margin: 0 auto; 
+  max-width: 1500px; 
+  box-sizing: border-box;
+  font-size: 1.3em;
+}
+.country-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+
+.country-card {
+  position: relative;
+  width: 500px; 
+  text-align: center;
+  overflow: hidden;
+  border-radius: 8px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  margin-bottom: 80px;
+}
+
+.country-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.country-card .country-title {
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.4); 
+  color: #fff; 
+  padding: 10px 10px;
+  border-radius: 4px; 
+  font-size: 3rem; 
+}

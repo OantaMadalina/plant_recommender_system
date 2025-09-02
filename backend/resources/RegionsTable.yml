@@ -1,0 +1,15 @@
+RegionsTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service}_${self:provider.stage}_regions
+    AttributeDefinitions:
+      - AttributeName: regionName
+        AttributeType: S
+    KeySchema:
+      - AttributeName: regionName
+        KeyType: HASH
+    BillingMode: PAY_PER_REQUEST
+    SSESpecification:
+      SSEEnabled: true
+      SSEType: KMS
+      KMSMasterKeyId: !Ref CMKDynamoDB

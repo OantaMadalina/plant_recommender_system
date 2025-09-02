@@ -1,0 +1,50 @@
+.workoutList {
+  padding: 20px;
+  background-color: var(--background-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--header-bg);
+}
+
+.pageTitle {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.workoutListItems {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.workoutListItem {
+  background-color: var(--background-color);
+  border: 1px solid var(--text-color);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.workoutListItem:hover {
+  background-color: var(--button-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.workoutListItem h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-color);
+}
+
+.workoutListItem p {
+  margin: 5px 0;
+  color: var(--text-color);
+}
+
+.loader {
+  text-align: center;
+  color: var(--text-color);
+  font-size: 1.5rem;
+}

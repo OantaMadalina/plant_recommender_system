@@ -1,0 +1,15 @@
+HoroscopeStatsTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service}_${self:provider.stage}_horoscope_stats
+    AttributeDefinitions:
+      - AttributeName: horoscopeStatType
+        AttributeType: S
+    KeySchema:
+      - AttributeName: horoscopeStatType
+        KeyType: HASH
+    BillingMode: PAY_PER_REQUEST
+    SSESpecification:
+      SSEEnabled: true
+      SSEType: KMS
+      KMSMasterKeyId: !Ref CMKDynamoDB

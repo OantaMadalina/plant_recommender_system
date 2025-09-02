@@ -1,0 +1,54 @@
+/* Default (Light Mode) */
+:root {
+  --header-bg: #f0f0f0;
+  --header-text-color: #333;
+  --footer-bg: #f0f0f0;
+  --footer-text-color: #333;
+  --link-color: #00796b; /* Muted teal for a natural accent */
+  --link-hover-color: #004d40;
+  --button-bg: #8d8d8d; /* Neutral tone */
+  --button-hover-bg: #5c5c5c;
+  --button-text-color: #fff;
+  --background-color: #fafafa;
+  --text-color: #1a1a1a;
+  --form-bg-hover: #e0e0e0;
+}
+
+/* Softer Dark Mode */
+body.dark-mode {
+  --header-bg: #3a3a3a;
+  --header-text-color: #e0e0e0;
+  --footer-bg: #3a3a3a;
+  --footer-text-color: #e0e0e0;
+  --link-color: #80cbc4; /* Softer teal */
+  --link-hover-color: #4db6ac;
+  --button-bg: #6d6d6d;
+  --button-hover-bg: #5a5a5a;
+  --button-text-color: #fff;
+  --background-color: #2e2e2e;
+  --text-color: #d3d3d3;
+  --form-bg-hover: #4a4a4a;
+}
+
+
+/* Apply global styles */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  padding: 10px 15px;
+  background-color: var(--button-bg);
+  border: none;
+  color: var(--button-text-color);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: var(--button-hover-bg);
+}

@@ -1,0 +1,7 @@
+BootcampBucketIAM:
+  Effect: Allow
+  Action:
+    - s3:*
+  Resource:
+    - arn:aws:s3:::${self:service}-${self:provider.stage}
+    - arn:aws:s3:::${self:service}-${self:provider.stage}/*

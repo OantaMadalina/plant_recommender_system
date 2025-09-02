@@ -1,0 +1,401 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 1100px;
+}
+
+.playerGoalsModal {
+    background-color: rgb(53, 53, 53);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 600px;
+    color: #fefefe;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.playerGoalsModal h2 {
+    max-width: 100%;
+    text-align: center;
+}
+
+.playerPhotoAndGoals {
+    display: flex;
+    align-items: center;
+    /* justify-content: space-around; */
+    width: inherit;
+}
+
+.playerPhoto {
+    width: 150px;
+    height: 150px;
+    margin: 20px 40px 10px 50px;
+    border: 1px solid #000000;
+    border-radius: 10px;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.teamsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 2px solid #ccc;
+    border-left: 2px solid #ccc;   /* Apply the left border */
+    border-right: 2px solid #ccc;  /* Apply the right border */
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 45%;
+    height: 100%;
+}
+
+.teamBadge {
+    width: 60px;
+    height: 60px;
+    margin: 10px;
+}
+
+.teamSelect {
+    margin: 5px;
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+  }
+
+.team span {
+    font-weight: bolder;
+    font-size: x-largeS;
+    color: #023c00;
+}
+
+.teamCode {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.teamScore {
+    width: 60px;
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    color: #023c00;
+}
+
+.scoreSeparator {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 15px;
+}
+
+.playersContainer {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 5px;
+}
+
+.playersList {
+    width: 45%;
+}
+
+.playersContainer h4 {
+    margin-bottom: 5px;
+    color: #888888;
+}
+
+.playerList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.scorerContainer {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px 5px;
+    border-radius: 10px;
+    margin: 0 0 7px 0;
+    background-color: #ccfeb7;
+    transition: background-color 0.5s ease;
+}
+
+.playerContainer {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px 5px;
+    border-radius: 10px;
+    margin: 0 0 7px 0;
+    background-color: #f1f0f0;
+    transition: background-color 0.5s ease;
+}
+
+.positionAndName {
+    display: flex;
+    flex-direction: row;
+}
+
+.playerContainer:hover {
+    background-color: #d3d3d3;
+}
+
+/* .playerContainer {
+    display: flex;
+    flex-direction: row;
+} */
+
+.fieldPositionContainer {
+    /* background-color: #aba7a7; */
+    color: white;
+    padding: 2px;
+    border-radius: 10px;
+    margin: 0px 5px;
+    font-size: small;
+    width: 50px;
+    text-align: center;
+}
+
+.scoreContainer {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.scoreContainer span {
+    font-weight: 700;
+    font-size: large;
+}
+
+.minutesContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    max-width: 250px;
+    max-height: 120px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.minutesContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.minutesContainer::-webkit-scrollbar-track {
+    background: #252525;
+    border-radius: 10px;
+}
+
+.minutesContainer::-webkit-scrollbar-thumb {
+    background-color: grey;
+    border-radius: 10px;
+}
+
+.minutesContainer::-webkit-scrollbar-thumb:hover {
+    background-color: darkgrey;
+}
+
+.minuteButton {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.minuteItem {
+    background-color: rgb(160, 11, 11);
+    color: rgb(244, 244, 244);
+    border-radius: 10px;
+    padding: 2px 10px;
+    margin: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playerGoals {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 150px;
+    gap: 10px;
+}
+
+.formGroup {
+    text-align: center;
+    margin-bottom: 15px;
+    margin: 0px 5px 15px 5px;
+}
+
+.dateTimeInput {
+    padding: 10px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    font-size: 1rem;
+    max-width: 300px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s;
+}
+
+.dateTimeInput:focus {
+    border-color: #50b05d;
+    outline: none;
+}
+
+.dateTimeInput::placeholder {
+    color: #6b0707;
+    font-style: italic;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.playerGoalsButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding: 0px 20px;
+    width: inherit;
+    flex-direction: row-reverse;
+}
+
+.circleIcon {
+    cursor: pointer;
+    color: white;
+}
+
+.noStyleButton {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    outline: none;
+}
+
+.confirmButton {
+    background-color: green;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.confirmButton:hover {
+    background-color: #0e5416;
+}
+
+.confirmButton:active {
+    background-color: #284612;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+}
+
+.updateButton {
+    background-color:#102296;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.updateButton:hover {
+    background-color: rgb(0, 12, 103);
+}
+
+.updateButton:active {
+    background-color: #150547;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+}
+
+.confirmButton:disabled {
+    background-color: #d3d3d3;
+    color: black;
+    padding: 10px 20px;
+    cursor: not-allowed;
+    border-radius: 10px;
+    opacity: 0.7;
+}
+
+.updateButton:disabled {
+    background-color: #d3d3d3;
+    color: black;
+    padding: 10px 20px;
+    cursor: not-allowed;
+    border-radius: 10px;
+    opacity: 0.7;
+}
+
+.cancelButton {
+    background-color: rgb(191, 191, 191);
+    color: rgb(19, 19, 19);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cancelButton:hover {
+    background-color: rgb(138, 138, 138);
+}
+
+.cancelButton:active {
+    background-color: #bfbebe;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+}

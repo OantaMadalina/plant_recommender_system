@@ -1,0 +1,15 @@
+HoroscopeRatingTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service}_${self:provider.stage}_horoscope_rating
+    AttributeDefinitions:
+      - AttributeName: idRatingMapping
+        AttributeType: S
+    KeySchema:
+      - AttributeName: idRatingMapping
+        KeyType: HASH
+    BillingMode: PAY_PER_REQUEST
+    SSESpecification:
+      SSEEnabled: true
+      SSEType: KMS
+      KMSMasterKeyId: !Ref CMKDynamoDB

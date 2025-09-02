@@ -1,0 +1,49 @@
+.header {
+    background-color: #2D3748;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .logo {
+    font-size: 2.5rem;
+    color: #F6E05E;
+    font-weight: bold;
+  }
+  
+  .navList {
+    display: flex;
+    gap: 2.5rem;
+  }
+  
+  .navLink {
+    font-size: 1.2rem;
+    color: #F7FAFC;
+    position: relative;
+  }
+  
+  .navLink::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 3px;
+    background: #F6E05E;
+    transition: width 0.3s;
+  }
+  
+  .navLink:hover::after {
+    width: 100%;
+  }
+  
+  .navLink:hover {
+    color: #F6E05E;
+  }
+  
+  @media (max-width: 768px) {
+    .navList {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  }
+  

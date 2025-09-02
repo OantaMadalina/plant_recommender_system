@@ -1,0 +1,14 @@
+.submit-button{
+    padding: 8px 16px;
+    font-size: 17px;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: fantasy;
+}
+
+.submit-button:hover{
+    background-color: gray;
+}

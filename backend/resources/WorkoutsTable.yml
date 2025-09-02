@@ -1,0 +1,15 @@
+WorkoutsTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service}_${self:provider.stage}_workouts
+    AttributeDefinitions:
+      - AttributeName: workoutId
+        AttributeType: S
+    KeySchema:
+      - AttributeName: workoutId
+        KeyType: HASH
+    BillingMode: PAY_PER_REQUEST
+    SSESpecification:
+      SSEEnabled: true
+      SSEType: KMS
+      KMSMasterKeyId: !Ref CMKDynamoDB

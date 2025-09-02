@@ -1,0 +1,188 @@
+.heading {
+    width: 100%;
+    min-height: 5vh;
+}
+
+.game {
+    height: 85vh;
+    width: 100%;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.background {
+    position: absolute;
+    top: 10vh;
+    left: 0;
+    right: 0;
+    bottom: 5vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    z-index: 0;
+}
+
+.teamsContainer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 70%;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0px;
+    padding: 10px;
+    /* border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px; */
+}
+
+.teamScore {
+    width: 50px;
+    text-align: center;
+    font-size: 70px;
+    font-weight: bold;
+    color: #000000;
+    /* padding: 0px 20px; */
+}
+
+.team {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 45%;
+}
+
+.teamBadge {
+    /* position: relative; */
+    width: 150px;
+    height: 150px;
+    margin: 10px;
+    /* flex-shrink: 0; */
+}
+
+.team span {
+    /* padding: 20px; */
+    font-weight: bolder;
+    font-size: 32px;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scoreSeparator {
+    font-size: 60px;
+    font-weight: bolder;
+    /* margin: 0 15px; */
+}
+
+/* .stadium {
+    margin-top: 10px;
+    width: 55%;
+    height: 40vh;
+    opacity: 1;
+    border-radius: 10px;
+} */
+
+.gameDetails {
+    position: relative;
+    z-index: 1;
+    border: 2px solid #000000;
+    margin-top: 20px;
+    border-radius: 10px;
+    background-color: rgb(58, 58, 58, 0.8);
+    color: rgb(255, 255, 255);
+    opacity: 1;
+    width: 35%;
+    min-height: 30%;
+    max-height: 50%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.gameDateAndTime {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: larger;
+}
+
+.gameDateAndTime > * {
+    margin: 0px 2px;
+}
+
+.gameDateAndTime :nth-child(2) {
+    margin-left: 25px;
+}
+
+.stadiumDetails {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    margin-top: 10px;
+    font-weight: bolder;
+    font-size: larger;
+}
+
+.stadiumDetails > * {
+    margin: 0px 2px;
+}
+
+.stadiumDetails :nth-child(2) {
+    margin-left: 10px;
+}
+
+.customHr {
+    border: 1px solid #000000;
+    width: 90%;
+    margin: 20px 0;
+    border-radius: 10px;
+}
+
+.matchSummaryTitle {
+    font-size: large;
+    font-weight:bold;
+    font-style: oblique;
+    margin-bottom: 20px;
+}
+
+.scorersList {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    height: 100%;
+    width: 90%;
+    margin-bottom: 10px;
+}
+
+.scorersList::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scorersList::-webkit-scrollbar-track {
+    background: #252525;
+    border-radius: 10px;
+}
+
+.scorersList::-webkit-scrollbar-thumb {
+    background-color: grey;
+    border-radius: 10px;
+}
+
+.scorersList::-webkit-scrollbar-thumb:hover {
+    background-color: darkgrey;
+}

@@ -1,0 +1,25 @@
+SongsTable:
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: ${self:service}_${self:provider.stage}_songs
+    AttributeDefinitions:
+      - AttributeName: songId
+        AttributeType: S
+      - AttributeName: searchToken
+        AttributeType: S
+    KeySchema:
+      - AttributeName: songId
+        KeyType: HASH
+    GlobalSecondaryIndexes:
+      - IndexName: searchToken-index
+        KeySchema:
+        - AttributeName: searchToken
+          KeyType: HASH
+        Projection:
+          ProjectionType: ALL
+
+    BillingMode: PAY_PER_REQUEST
+    SSESpecification:
+      SSEEnabled: true
+      SSEType: KMS
+      KMSMasterKeyId: !Ref CMKDynamoDB

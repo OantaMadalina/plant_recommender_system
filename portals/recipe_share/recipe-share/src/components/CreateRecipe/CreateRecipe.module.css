@@ -1,0 +1,92 @@
+.createRecipe {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 3rem auto;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+  }
+  
+  h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #1A202C;
+  }
+  
+  p {
+    font-size: 1.25rem;
+    color: #718096;
+    margin-bottom: 2rem;
+  }
+  
+  .formGroup {
+    margin-bottom: 1.5rem;
+  }
+  
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #1A202C;
+  }
+  
+  input,
+  textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus,
+  textarea:focus {
+    border-color: #38B2AC; 
+    outline: none; 
+  }
+  
+  textarea {
+    resize: vertical; 
+    min-height: 150px; 
+  }
+  
+  .buttonWrapper {
+    display: flex;
+    justify-content: center;
+  }
+  
+  button {
+    background-color: #38B2AC;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #319795; 
+  }
+  
+  @media (max-width: 768px) {
+    .createRecipe {
+      width: 90%;
+    }
+  
+    h2 {
+      font-size: 2rem; 
+    }
+  
+    p {
+      font-size: 1rem; 
+    }
+  
+    button {
+      font-size: 1rem; 
+    }
+  }
+  

@@ -1,0 +1,224 @@
+.pageDiv {
+    width: 100%;
+    height: 85vh;
+    background-color: rgb(211, 211, 211);
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.playerDiv {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    justify-content: space-between;
+    flex: 0 0 60%;
+    padding: 80px;
+}
+
+.playerPhoto {
+    width: 300px;
+    height: 300px;
+    margin: 20px 40px 10px;
+    border: 1px solid #000000;
+    border-radius: 10px;
+}
+
+.captainBand {
+    width: 50px;
+    height: 50px;
+    margin: 20px;
+}
+
+.teamPhoto {
+    width: 120px;
+    height: 120px;
+    margin: 20px 40px 10px;
+    border-radius: 10px;
+}
+
+.playerOverview {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: start;
+}
+
+.playerPhotoAndName {
+    display: flex;
+    align-items: center;
+}
+
+.playerName {
+    font-size: 50px;
+    font-weight: bolder;
+    text-decoration: underline;
+}
+
+.footballPitch {
+    height: 500px;
+    width: 350px;
+    background-color: green;
+    position: relative;
+    border-radius: 10px;
+    border: 2px solid black;
+}
+
+.footballPitchAndLegend {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.heatmap {
+    display: flex;
+    /* flex-direction: column; */
+    align-items: center;
+    height: 100%;
+}
+
+.heatmapTitle {
+    /* padding-left: 100px; */
+    color: rgb(66, 66, 66);
+    font-style: oblique;
+}
+
+.heatmapTitleAndContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.footballPhoto {
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    border-radius: 10px;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.attackingDirection {
+    top: 175px;
+    height: 150px;
+    left: 0px;
+    width: 150px;
+    /* width: 100%; */
+    color: rgb(0, 0, 0);
+    opacity: 0.6;
+}
+
+.commonStyles {
+    font-weight: bolder;
+    font-size: larger;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: black;
+    z-index: 2;
+    opacity: 0.8;
+}
+
+.defenderArea {
+    position: absolute;
+    top: 300px;
+    height: 150px;
+    width: 100%;
+    background-color: orange;
+}
+
+.midfielderArea {
+    position: absolute;
+    top: 150px;
+    height: 150px;
+    width: 100%;
+    background-color: rgb(106, 255, 0);
+}
+
+.attackerArea {
+    position: absolute;
+    top: 0px;
+    height: 150px;
+    width: 100%;
+    background-color: rgb(0, 106, 255);
+    border-radius: 10px 10px 0px 0px;
+}
+
+.gkArea {
+    position: absolute;
+    top: 450px;
+    height: 50px;
+    left: 100px;
+    width: 150px;
+    background-color: rgb(184, 194, 208);
+    opacity: 0.8;
+}
+
+.fieldPosition {
+    position: absolute;
+    top: 450px;
+    height: 50px;
+    left: 100px;
+    width: 150px;
+    background-color: rgb(184, 194, 208);
+    z-index: 2;
+    opacity: 0.6;
+}
+
+.pitchLegend {
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.playerDetails {
+    display: flex;
+    font-size: 30px;
+    font-weight: 500;
+    justify-content: center;
+}
+
+.playerDetail {
+    display: flex;
+    max-width: 450px;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+}
+
+.playerDetailsColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 40px;
+    max-width: 100%;
+}
+
+.playerDetailText {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.verticalLine {
+    width: 4px;
+    height: 100%;
+    border-left: 4px solid black;
+    border-radius: 40px;
+    margin: 60px;
+}

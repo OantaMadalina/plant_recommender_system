@@ -1,0 +1,207 @@
+.pageDiv {
+    width: 100%;
+    height: 85vh;
+    background-color: rgb(211, 211, 211);
+}
+
+.centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.teamDiv {
+    display: flex;
+    flex-direction: column;
+    /* align-items: center; */
+    justify-content: center;
+    padding-left: 20px;
+    flex: 0 0 60%;
+}
+
+.stadiumDiv {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    /* width: 100%; */
+    justify-content: center;
+    padding-right: 20px;
+    height: 100%;
+    gap: 10px;
+}
+
+.stadiumDiv h1 {
+    font-size: 40px;
+    margin-left: 25px;
+}
+
+.teamAndStadium {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    height: 100%;
+    width: 100%;
+}
+
+.BadgeAndDetails {
+    display: flex;
+    gap: 10px;
+}
+
+.teamBadge {
+    width: 300px;
+    height: 300px;
+    margin-top: 25px;
+    margin-left: 25px;
+}
+
+.stadiumPhoto {
+    margin: 25px 25px 10px 25px;
+    border-radius: 10px;
+    border: 2px solid black;
+}
+
+.BadgeAndDetails h1 {
+    font-size: 70px;
+}
+
+.teamGeneralDetails {
+    display: flex;
+    flex-direction: column;
+    margin: 25px;
+}
+
+.nameHr {
+    border: 2px solid #000000;
+    width: 100%;
+    margin: 20px 0;
+    border-radius: 10px;
+}
+
+.stadiumNameHr {
+    border: 2px solid #000000;
+    width: 50%;
+    margin-left: 25px;
+    border-radius: 10px;
+}
+
+.teamDetailsHr {
+    border: 2px solid #000000;
+    width: 100%;
+    margin: 20px 20px 0px 10px;
+    border-radius: 10px;
+}
+
+.moreTeamDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: x-large;
+    font-weight: 600;
+}
+
+.moreTeamDetails div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.moreStadiumDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: x-large;
+    font-weight: 600;
+    padding-left: 25px;
+}
+
+.moreStadiumDetails div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.verticalLine {
+    width: 4px;
+    margin: 20px 0px;
+    height: 90%;
+    /* justify-content: center; */
+    background-color: black;
+    border-radius: 10px;
+}
+
+.squadTitle {
+    margin: 10px 10px 0px 25px;
+    color: rgb(53, 53, 53);
+    text-decoration: underline;
+}
+
+.playerList {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 10px 0px 25px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.playerContainer {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 10px 5px;
+    border-radius: 10px;
+    height: auto;
+    margin: 0 10px 7px 0;
+    background-color: #f1f0f0;
+    transition: background-color 0.5s ease;
+}
+
+.positionAndName {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.playerContainer:hover {
+    background-color: #ffffff;
+}
+
+.fieldPositionContainer {
+    /* background-color: #aba7a7; */
+    color: white;
+    padding: 2px;
+    border-radius: 10px;
+    margin: 0px 5px;
+    font-size: small;
+    width: 50px;
+    text-align: center;
+}
+
+.playerList::-webkit-scrollbar {
+    width: 15px;
+}
+
+.playerList::-webkit-scrollbar-track {
+    background: #393939;
+    border-radius: 10px;
+}
+
+.playerList::-webkit-scrollbar-thumb {
+    background-color: rgb(184, 184, 184);
+    border-radius: 10px;
+}
+
+.playerList::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(27, 142, 25);
+}
+
+.moreInfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgb(71, 71, 71);
+    opacity: 0.5;
+}

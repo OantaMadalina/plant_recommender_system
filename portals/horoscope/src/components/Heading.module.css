@@ -1,0 +1,42 @@
+.heading{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+.heading-title{
+    padding: 8px 16px;
+    display: flex;
+    align-self: flex-start;
+    color: white;
+    font-family: fantasy;
+    background-color: rgba(0,0,0,0.5);
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.buttons-container{
+    display: flex;
+    align-self: flex-end;
+    justify-content: center;
+    gap: 10px; 
+}
+
+.heading-button{
+    padding: 5px 16px;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.5);;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-family: fantasy;
+}
+
+.heading-button:hover{
+    background-color: gray;
+}
+
+.heading-title:hover{
+    background-color: gray;
+}
