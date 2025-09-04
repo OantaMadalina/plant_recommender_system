@@ -14,6 +14,6 @@ S3BucketBootcampBucket:
       ServerSideEncryptionConfiguration:
       - ServerSideEncryptionByDefault:
           SSEAlgorithm: "aws:kms"
-          KMSMasterKeyID:
-            Fn::GetAtt: [CMKS3, Arn]
+          # KMSMasterKeyID:
+          #   Fn::GetAtt: [CMKS3, Arn]
         BucketKeyEnabled: true

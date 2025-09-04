@@ -1,4 +1,4 @@
-service: bootcampengine
+service: bootcampengine-dubla2
 useDotenv: true
 configValidationMode: warn
 provider:
@@ -11,7 +11,7 @@ provider:
   timeout: 5
   stackTags: &TAGS
     Project: "BOOTCAMP"
-    ManagedBy: "gdcpubliccloudmgmt@vodafone.com"
+    ManagedBy: "oanta.elena.madalina@gmail.com"
     CostCenter: "123"
     Confidentiality: "C2"
     TaggingVersion: "V2.2"
@@ -82,23 +82,23 @@ package:
 plugins:
   - serverless-cloudformation-sub-variables
   - serverless-python-requirements
-  - serverless-certificate-creator
-  - serverless-domain-manager
+  # - serverless-certificate-creator
+  # - serverless-domain-manager
   - serverless-iam-roles-per-function
   - serverless-s3-remover
   - serverless-apigw-binary
-  - serverless-plugin-datadog
+  # - serverless-plugin-datadog
   - serverless-dependson-plugin
   - serverless-prune-plugin
 params:
   default:
-    appdynamicsAccountName: vodafoneuk-dev
-    appdynamicsControllerHost: vodafoneuk-dev.saas.appdynamics.com
-    mftAccount: "016329010806"
-    s3LoggingBucket: "399396145059-s3logging"
-    vpcEndpointId: "vpce-01a258b5978d4323b"
+    appdynamicsAccountName: oantamadalina-dev
+    appdynamicsControllerHost: oantamadalina-dev.saas.appdynamics.com
+    mftAccount: "123123123"
+    # s3LoggingBucket: "123123123-s3logging"
+#     vpcEndpointId: "vpce-123123123"
     hostedZoneId: "Z0389021K571CXAITMQP"
-    cognitoUserPool: arn:aws:cognito-idp:eu-west-1:399396145059:userpool/eu-west-1_OJtdqlfbA
+#     cognitoUserPool: arn:aws:cognito-idp:eu-west-1:399396145059:userpool/eu-west-1_OJtdqlfbA
 
 custom:
   prune:
@@ -120,19 +120,13 @@ custom:
     adoVariablesPAT: ${env:ADO_VARIABLES_PAT, ''}
 
   mftUserId:
-    other: "AROAQHTKI5Z3CCDWZ47CQ:*"
-
-  # Security groups used in the BOOTCAMP VPC
-  # ${self:custom.bootcampSubnets.${opt:stage}, self:custom.bootcampSubnets.other}
-  bootcampSecurityGroups: ${file(serverless_templates/securityGroupsCavendish.yml):cavendishSecurityGroups}
-  # ${self:custom.bootcampSubnets.${opt:stage}, self:custom.bootcampSubnets.other}
-  bootcampSubnets: ${file(serverless_templates/subnetsCavendish.yml):cavendishSubnets}
+    other: "AKIASCYEB727RCPHME63:*"
 
   # Datadog Lambda Python integration
-  datadog:
-    apiKey: ${env:DATADOG_API_KEY, ''}
-    site: datadoghq.eu
-    enabled: ${strToBool(${env:DD_PLUGIN_ENABLED, true})}
+  # datadog:
+  #   apiKey: ${env:DATADOG_API_KEY, ''}
+  #   site: datadoghq.eu
+  #   enabled: ${strToBool(${env:DD_PLUGIN_ENABLED, true})}
 
   environmentTag: ${file(serverless_templates/environmentTags.yml):environmentTag}
 
@@ -154,28 +148,28 @@ custom:
   domainsCreateRecord:
     other: true
 
-  customDomain:
-    domainName: ${self:custom.fqdn}
-    # certificateArn: '${certificate:${self:custom.customCertificate.certificateName}:CertificateArn}'
-    certificateName: ${self:custom.fqdn}
-    hostedZoneId: ${param:hostedZoneId}
-    autoDomain: true
-    basePath: ""
-    stage: "${self:custom.stage}"
-    createRoute53Record: ${self:custom.domainsCreateRecord.${self:custom.stage}, self:custom.domainsCreateRecord.other}
-    createRoute53IPv6Record: false
+  # customDomain:
+  #   domainName: ${self:custom.fqdn}
+  #   # certificateArn: '${certificate:${self:custom.customCertificate.certificateName}:CertificateArn}'
+  #   certificateName: ${self:custom.fqdn}
+  #   # hostedZoneId: ${param:hostedZoneId}
+  #   autoDomain: true
+  #   basePath: ""
+  #   stage: "${self:custom.stage}"
+  #   createRoute53Record: ${self:custom.domainsCreateRecord.${self:custom.stage}, self:custom.domainsCreateRecord.other}
+  #   createRoute53IPv6Record: false
 
-  customCertificate:
-    certificateName: "${self:custom.fqdn}"
-    #idempotencyToken: ${self:custom.domains.${self:custom.stage}}
-    writeCertInfoToFile: true
-    certInfoFileName: "certs/${self:provider.stage}/cert-info.yml"
-    hostedZoneNames: "${self:custom.domains.tld}."
-    region: us-east-1
-    tags:
-      <<: *TAGS
-      Name: "${self:custom.fqdn}"
-    rewriteRecords: false
+  # customCertificate:
+  #   certificateName: "${self:custom.fqdn}"
+  #   #idempotencyToken: ${self:custom.domains.${self:custom.stage}}
+  #   writeCertInfoToFile: true
+  #   certInfoFileName: "certs/${self:provider.stage}/cert-info.yml"
+  #   hostedZoneNames: "${self:custom.domains.tld}."
+  #   region: us-east-1
+  #   tags:
+  #     <<: *TAGS
+  #     Name: "${self:custom.fqdn}"
+  #   rewriteRecords: false
 
   remover:
     buckets:
@@ -1217,43 +1211,35 @@ resources:
             - ""
 
   Resources:
-    CMKDynamoDB: ${file(resources/CMKDynamoDB.yml):CMKDynamoDB}
+    # CMKDynamoDB: ${file(resources/CMKDynamoDB.yml):CMKDynamoDB}
 
-    CMKDynamoDBAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/bootcamp-${self:provider.stage}/dynamodb
-        TargetKeyId: !Ref CMKDynamoDB
+    # CMKDynamoDBAlias:
+    #   Type: AWS::KMS::Alias
+    #   Properties:
+    #     AliasName: alias/bootcamp-${self:provider.stage}/dynamodb
+    #     TargetKeyId: !Ref CMKDynamoDB
 
-    CMKSecretsManager: ${file(resources/CMKSecretsManager.yml):CMKSecretsManager}
+    # CMKSecretsManager: ${file(resources/CMKSecretsManager.yml):CMKSecretsManager}
 
-    CMKSecretsManagerAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/bootcamp-${self:provider.stage}/secretsmanager
-        TargetKeyId: !Ref CMKSecretsManager
+    # CMKSecretsManagerAlias:
+    #   Type: AWS::KMS::Alias
+    #   Properties:
+    #     AliasName: alias/bootcamp-${self:provider.stage}/secretsmanager
+    #     TargetKeyId: !Ref CMKSecretsManager
 
-    CMKSQS: ${file(resources/CMKSQS.yml):CMKSQS}
+    # CMKSQS: ${file(resources/CMKSQS.yml):CMKSQS}
 
-    CMKSQSAlias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/bootcamp-${self:provider.stage}/sqs
-        TargetKeyId: !Ref CMKSQS
-
-    CMKS3: ${file(resources/CMKS3.yml):CMKS3}
-
-    CMKS3Alias:
-      Type: AWS::KMS::Alias
-      Properties:
-        AliasName: alias/bootcamp-${self:provider.stage}/s3
-        TargetKeyId: !Ref CMKS3
+    # CMKSQSAlias:
+    #   Type: AWS::KMS::Alias
+    #   Properties:
+    #     AliasName: alias/bootcamp-${self:provider.stage}/sqs
+    #     TargetKeyId: !Ref CMKSQS
 
     ServerlessDeploymentBucket:
       Type: AWS::S3::Bucket
       Properties:
         LoggingConfiguration:
-          DestinationBucketName: "${param:s3LoggingBucket}"
+          # DestinationBucketName: "${param:s3LoggingBucket}"
           LogFilePrefix: 's3\${self:provider.stage}-serverlessDeployBucketEngine'
 
     ServerlessDeploymentBucketPolicy:
@@ -1289,45 +1275,45 @@ resources:
                 - "sts:AssumeRole"
         Path: "/"
 
-    BootcampBucketPolicy:
-      Type: AWS::S3::BucketPolicy
-      DependsOn: ServerlessDeploymentBucket
-      Properties:
-        PolicyDocument:
-          Statement:
-            - Sid: EnforceHttpsAlways
-              Effect: Deny
-              Principal: "*"
-              Action: "*"
-              Resource:
-                - "arn:aws:s3:::#{S3BucketBootcampBucket}"
-                - "arn:aws:s3:::#{S3BucketBootcampBucket}/*"
-              Condition:
-                Bool:
-                  aws:SecureTransport: "false"
-            - Sid: BucketPolicyForTransferFamily
-              Effect: Allow
-              Principal:
-                AWS: "arn:aws:iam::${param:mftAccount}:root"
-              Action:
-                - "s3:PutObject"
-                - "s3:PutObjectAcl"
-                - "s3:GetObject"
-                - "s3:DeleteObjectVersion"
-                - "s3:DeleteObject"
-                - "s3:GetObjectVersion"
-                - "s3:ListBucket"
-                - "s3:GetBucketLocation"
-              Resource:
-                - "arn:aws:s3:::#{S3BucketBootcampBucket}"
-                - "arn:aws:s3:::#{S3BucketBootcampBucket}/*"
-              Condition:
-                StringLike:
-                  "aws:userId": ${self:custom.mftUserId.${opt:stage}, self:custom.mftUserId.other}
-        Bucket:
-          Ref: S3BucketBootcampBucket
-
     S3BucketBootcampBucket: ${file(resources/S3BucketBootcampBucket.yml):S3BucketBootcampBucket}
+
+    # BootcampBucketPolicy:
+    #   Type: AWS::S3::BucketPolicy
+    #   DependsOn: ServerlessDeploymentBucket
+    #   Properties:
+    #     PolicyDocument:
+    #       Statement:
+    #         - Sid: EnforceHttpsAlways
+    #           Effect: Deny
+    #           Principal: "*"
+    #           Action: "*"
+    #           Resource:
+    #             - "arn:aws:s3:::#{S3BucketBootcampBucket}"
+    #             - "arn:aws:s3:::#{S3BucketBootcampBucket}/*"
+    #           Condition:
+    #             Bool:
+    #               aws:SecureTransport: "false"
+    #         - Sid: BucketPolicyForTransferFamily
+    #           Effect: Allow
+    #           Principal:
+    #             AWS: "arn:aws:iam::${param:mftAccount}:root"
+    #           Action:
+    #             - "s3:PutObject"
+    #             - "s3:PutObjectAcl"
+    #             - "s3:GetObject"
+    #             - "s3:DeleteObjectVersion"
+    #             - "s3:DeleteObject"
+    #             - "s3:GetObjectVersion"
+    #             - "s3:ListBucket"
+    #             - "s3:GetBucketLocation"
+    #           Resource:
+    #             - "arn:aws:s3:::#{S3BucketBootcampBucket}"
+    #             - "arn:aws:s3:::#{S3BucketBootcampBucket}/*"
+    #           Condition:
+    #             StringLike:
+    #               "aws:userId": ${self:custom.mftUserId.${opt:stage}, self:custom.mftUserId.other}
+    #     Bucket:
+    #       Ref: S3BucketBootcampBucket
 
     PlantDataTable: ${file(resources/PlantDataTable.yml):PlantDataTable}
 
@@ -1405,13 +1391,7 @@ resources:
         DisplayName: ${self:service}_${self:provider.stage}-apiquota-alarm-topic
         Subscription:
           - Protocol: email
-            Endpoint: Cavendish@internal.vodafone.com
-          - Protocol: email
-            Endpoint: andrei.chitu@vodafone.com
-          - Protocol: email
-            Endpoint: bianca.oprea1@vodafone.com
-          - Protocol: email
-            Endpoint: ashley.martin@vodafone.com
+            Endpoint: oanta.elena.madalina@gmail.com
 
   Outputs:
     apiGatewayRestApiId:
@@ -1433,8 +1413,3 @@ resources:
       Value: !Ref ApiGatewayRestApiKey
       Export:
         Name: ${self:service}-${self:provider.stage}-APIGW-apiKey
-
-    secretsCmkArn:
-      Value: !GetAtt CMKSecretsManager.Arn
-      Export:
-        Name: ${self:service}-${self:provider.stage}-CMK-secrets-arn

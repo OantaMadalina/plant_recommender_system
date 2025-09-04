@@ -6,34 +6,51 @@ from bootcamp_lib.dynamodb import DynamodbTable, DynamodbCachedTable
 
 @dataclass
 class PlantDataModel(DynamoDbModel):
-    idPlant: str = ""
-    namePlant: str = ""
-    pricePlant: str = ""
-    quantityPlant: str = ""
-    descriptionPlant: str = ""
-    originCountry: str = ""
+    plantID: int = 0
+    plantRating: int = 0
+    plantName: str = ""
+    soilType: str = ""
+    sunlightHours: int = 0
+    waterFrequency: str = ""
+    fertilizerType: str = ""
+    temperature: float = 0.0
+    humidity: float = 0.0
+    location: str = ""
+    age: int = 0
 
     _validations: ClassVar[dict] = {
-        "idPlant": {
+        "plantID": {
             "required": True
         },
-        "namePlant": {
+        "plantRating": {
             "required": True
         },
-        "pricePlant": {
+        "plantName": {
             "required": True
         },
-        "locationPlant": {
-            "required": False
+        "soilType": {
+            "required": True
         },
-        "quantityPlant": {
-            "required": False
+        "sunlightHours": {
+            "required": True
         },
-        "descriptionPlant": {
-            "required": False
+        "waterFrequency": {
+            "required": True
         },
-        "originCountry": {
-            "required": False
+        "fertilizerType": {
+            "required": True
+        },
+        "temperature": {
+            "required": True
+        },
+        "humidity": {
+            "required": True
+        },
+        "location": {
+            "required": True
+        },
+        "age": {
+            "required": True
         }
     }
 
@@ -51,10 +68,10 @@ class PlantDataCache(DynamodbCachedTable[PlantDataModel]):
         self._items = dict()
 
     def _get_items(self, keys: List[dict]):
-        plant = self._table.get_items(keys)
-        for plant in plant:
-            self._items[plant.idPlant] = plant
+        plants = self._table.get_items(keys)
+        for plant in plants:
+            self._items[plant.plantID] = plant
 
     def _get_item(self, key: dict):
         if item := self._table.get_item(key):
-            self._items[item.idPlant] = item
+            self._items[item.plantID] = item

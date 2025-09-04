@@ -68,7 +68,7 @@ stages:
         timeoutInMinutes: 1440
         inputs:
           notifyUsers: |
-            ashley.martin@vodafone.com
+            oanta.elena.madalina@gmail.com
           instructions: 'Please validate the deployment and resume'
           onTimeout: 'reject'
 

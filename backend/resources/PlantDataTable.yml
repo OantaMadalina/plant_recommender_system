@@ -11,5 +11,5 @@ PlantDataTable:
     BillingMode: PAY_PER_REQUEST
     SSESpecification:
       SSEEnabled: true
-      SSEType: KMS
-      KMSMasterKeyId: !Ref CMKDynamoDB
+      # SSEType: KMS
+      # KMSMasterKeyId: !Ref CMKDynamoDB
